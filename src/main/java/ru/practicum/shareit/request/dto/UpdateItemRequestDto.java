@@ -1,19 +1,13 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.request.dto;
 
 import lombok.Data;
 
-/**
- * TODO Sprint add-controllers.
- */
-
 @Data
-public class ItemDto {
+public class UpdateItemRequestDto {
 
     String name;
 
     String description;
-
-    Boolean available;
 
     public boolean hasName() {
         return isNotBlank(name);
@@ -21,10 +15,6 @@ public class ItemDto {
 
     public boolean hasDescription() {
         return isNotBlank(description);
-    }
-
-    public boolean hasAvailable() {
-        return available != null;
     }
 
     boolean isNotBlank(String value) {

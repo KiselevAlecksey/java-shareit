@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -6,12 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * TODO Sprint add-controllers.
+ * TODO Sprint add-item-requests.
  */
-
 @Data
 @Builder(toBuilder = true)
-public class Item {
+public class ItemRequest {
 
     Long id;
 

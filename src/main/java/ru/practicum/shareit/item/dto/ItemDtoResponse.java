@@ -7,7 +7,9 @@ import lombok.Data;
  */
 
 @Data
-public class ItemDto {
+public class ItemDtoResponse {
+
+    Long id;
 
     String name;
 
