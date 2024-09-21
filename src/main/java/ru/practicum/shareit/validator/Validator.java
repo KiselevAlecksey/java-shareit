@@ -33,6 +33,7 @@ public class Validator {
     }
 
     private boolean isEmailInvalid(String email) {
+        if (email == null) return false;
         return email.isBlank() || email.indexOf('@') == -1;
     }
 
