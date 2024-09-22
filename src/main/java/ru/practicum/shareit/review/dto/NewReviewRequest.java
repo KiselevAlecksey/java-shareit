@@ -8,8 +8,6 @@ import lombok.Data;
 @Data
 public class NewReviewRequest implements ReviewRequest {
 
-    Long id;
-
     @NotBlank
     String content;
 

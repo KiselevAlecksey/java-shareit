@@ -55,14 +55,8 @@ public class BookingMapper {
     }
 
     public static Booking updateBookingFields(Booking booking, UpdateBookingRequest request) {
-        if (request.hasStartBooking()) {
-            booking.setStartBooking(request.getStartBooking());
-        }
         if (request.hasDuration()) {
             booking.setDuration(Duration.ofMillis(request.getDuration()));
-        }
-        if (request.hasIsConfirm()) {
-            booking.setIsConfirm(request.getIsConfirm());
         }
         if (request.hasContent()) {
             booking.setContent(request.getContent());

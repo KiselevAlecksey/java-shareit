@@ -11,9 +11,9 @@ public interface BookingService {
 
     BookingResponse getById(Long id);
 
-    BookingResponse update(UpdateBookingRequest bookingRequest);
+    BookingResponse update(UpdateBookingRequest bookingRequest, long id);
 
-    BookingResponse updateConfirm(UpdateBookingConfirmResponse bookingRequest);
+    BookingResponse updateConfirm(UpdateBookingConfirmResponse bookingRequest, long id);
 
     void delete(Long id);
 }

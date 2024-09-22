@@ -14,7 +14,6 @@ public class ReviewMapper {
     public static Review mapToReview(NewReviewRequest review) {
 
         return Review.builder()
-                .id(review.getId())
                 .content(review.getContent())
                 .isComplete(review.getIsComplete())
                 .isPositive(review.getIsPositive())

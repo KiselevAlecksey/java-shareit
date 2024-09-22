@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,41 +22,38 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingResponse create(@RequestBody NewBookingRequest bookingRequest) {
-        log.error("Create booking {} start", bookingRequest);
+    public BookingResponse create(@RequestBody @Valid NewBookingRequest bookingRequest) {
         BookingResponse created = bookingService.create(bookingRequest);
-        log.error("Created booking {}", bookingRequest);
+        log.info("Created booking {}", bookingRequest);
         return created;
     }
 
     @GetMapping("/{id}")
     public BookingResponse getById(@PathVariable Long id) {
-        log.error("Get booking by id {} start", id);
         BookingResponse booking = bookingService.getById(id);
-        log.error("Get booking by id {} complete", id);
+        log.info("Get booking by id {} complete", id);
         return booking;
     }
 
-    @PatchMapping
-    public BookingResponse update(@RequestBody UpdateBookingRequest bookingRequest) {
-        log.error("update booking {} start", bookingRequest);
-        BookingResponse updated = bookingService.update(bookingRequest);
-        log.error("updated booking {}", bookingRequest);
+    @PatchMapping("/{id}")
+    public BookingResponse update(@RequestBody @Valid UpdateBookingRequest bookingRequest, @PathVariable long id) {
+        BookingResponse updated = bookingService.update(bookingRequest, id);
+        log.info("updated booking {}", bookingRequest);
         return updated;
     }
 
-    @PatchMapping("/confirm")
-    public BookingResponse updateConfirm(@RequestBody UpdateBookingConfirmResponse bookingRequest) {
-        log.error("update booking {} start", bookingRequest);
-        BookingResponse updated = bookingService.updateConfirm(bookingRequest);
-        log.error("updated booking {}", bookingRequest);
+    @PatchMapping("/confirm/{id}")
+    public BookingResponse updateConfirm(
+            @RequestBody @Valid UpdateBookingConfirmResponse bookingRequest,
+            @PathVariable long id) {
+        BookingResponse updated = bookingService.updateConfirm(bookingRequest, id);
+        log.info("updated booking {}", bookingRequest);
         return updated;
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        log.error("Delete booking id {} start", id);
         bookingService.delete(id);
-        log.error("Deleted booking id is {} complete", id);
+        log.info("Deleted booking id is {} complete", id);
     }
 }

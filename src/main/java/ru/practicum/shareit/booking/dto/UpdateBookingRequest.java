@@ -7,12 +7,7 @@ import lombok.Data;
 import java.time.Instant;
 
 @Data
-public class UpdateBookingRequest implements BookingRequest {
-
-    Long id;
-
-    @NotBlank
-    Long ownerId;
+public class UpdateBookingRequest {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Instant startBooking;
@@ -22,21 +17,10 @@ public class UpdateBookingRequest implements BookingRequest {
     @NotBlank
     Long consumerId;
 
-    @JsonProperty("isConfirm")
-    Boolean isConfirm;
-
     String content;
-
-    public boolean hasStartBooking() {
-        return startBooking != null;
-    }
 
     public boolean hasDuration() {
         return duration != null;
-    }
-
-    public boolean hasIsConfirm() {
-        return isConfirm != null && !isConfirm;
     }
 
     public boolean hasContent() {

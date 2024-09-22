@@ -10,7 +10,8 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.review.dto.NewReviewRequest;
 import ru.practicum.shareit.review.dto.ReviewRequest;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.dto.UserDto;
+
+import ru.practicum.shareit.user.dto.UserRequest;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class Validator {
 
     private final ItemRepository itemRepository;
 
-    public void validateUserRequest(UserDto userRequest) {
+    public void validateUserRequest(UserRequest userRequest) {
         StringBuilder errorMessage = new StringBuilder();
 
         if (isEmailInvalid(userRequest.getEmail())) {

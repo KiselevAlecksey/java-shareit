@@ -11,12 +11,16 @@ import ru.practicum.shareit.booking.dto.UpdateBookingRequest;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
+
+    private final ItemRepository itemRepository;
 
     @Override
     public BookingResponse create(NewBookingRequest bookingRequest) {
@@ -28,6 +32,12 @@ public class BookingServiceImpl implements BookingService {
         Booking bookingCreated = bookingRepository.create(booking).orElseThrow(
                 () -> new NotFoundException("Бронь не удалось сохранить")
         );
+
+        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
+                () -> new NotFoundException("Предмет не найден")
+        );
+
+        itemRepository.saveBookingItem(booking.getOwnerId(), booking.getId(), item);
 
         return BookingMapper.mapToBookingResponse(bookingCreated);
     }
@@ -43,11 +53,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse update(UpdateBookingRequest bookingRequest) {
+    public BookingResponse update(UpdateBookingRequest bookingRequest, long id) {
 
         //validator.validateBookingRequest(bookingRequest);
 
-        Booking booking = bookingRepository.getById(bookingRequest.getId()).orElseThrow(
+        Booking booking = bookingRepository.getById(id).orElseThrow(
                 () -> new NotFoundException("Бронь не найдена")
         );
 
@@ -57,14 +67,16 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException("Бронь не удалось обновить")
         );
 
+        updateItemRepository(booking);
+
         return BookingMapper.mapToBookingResponse(bookingUpdated);
     }
 
     @Override
-    public BookingResponse updateConfirm(UpdateBookingConfirmResponse bookingRequest) {
+    public BookingResponse updateConfirm(UpdateBookingConfirmResponse bookingRequest, long id) {
         //validator.validateReviewRequest(reviewRequest);
 
-        Booking booking = bookingRepository.getById(bookingRequest.getId()).orElseThrow(
+        Booking booking = bookingRepository.getById(id).orElseThrow(
                 () -> new NotFoundException("Бронь не найдена")
         );
 
@@ -73,6 +85,8 @@ public class BookingServiceImpl implements BookingService {
         Booking bookingUpdated = bookingRepository.updateConfirm(booking).orElseThrow(
                 () -> new NotFoundException("Бронь не удалось обновить")
         );
+
+        updateItemRepository(booking);
 
         return BookingMapper.mapToBookingResponse(bookingUpdated);
     }
@@ -87,6 +101,24 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException("Бронь не найдена")
         );
 
+        Booking booking = bookingRepository.getById(id).orElseThrow(
+                () -> new NotFoundException("Бронь не удалось сохранить")
+        );
+
+        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
+                () -> new NotFoundException("Предмет не найден")
+        );
+
+        itemRepository.deleteBookingItem(booking.getOwnerId(), booking.getId(), item);
+
         bookingRepository.delete(id);
+    }
+
+    private void updateItemRepository(Booking booking) {
+        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
+                () -> new NotFoundException("Предмет не найден")
+        );
+
+        itemRepository.updateBookingItem(booking.getOwnerId(), booking.getId(), item);
     }
 }

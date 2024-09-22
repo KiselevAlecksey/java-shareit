@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,10 +32,9 @@ public class ItemRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestDto add(
             @RequestHeader("X-Sharer-User-Id") long userId,
-            @RequestBody NewItemRequestDto item) {
-        log.error("Item create {} start", item);
+            @RequestBody @Valid NewItemRequestDto item) {
         ItemRequestDto dto = itemRequestService.add(userId, item);
-        log.error("Item create {} complete", item);
+        log.info("Item create {} complete", item);
         return dto;
     }
 
@@ -42,8 +42,12 @@ public class ItemRequestController {
     public ItemRequestDto update(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId,
-            @RequestBody UpdateItemRequestDto item) {
-        return itemRequestService.update(userId, itemId, item);
+            @RequestBody @Valid UpdateItemRequestDto item) {
+
+        ItemRequestDto itemRequestDto = itemRequestService.update(userId, itemId, item);
+        log.info("ItemRequest updated {} complete", item);
+        return itemRequestDto;
+
     }
 
     @DeleteMapping("/{itemId}")
@@ -51,17 +55,23 @@ public class ItemRequestController {
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId) {
         itemRequestService.delete(userId, itemId);
+        log.info("ItemRequest deleted userId {}, itemId {} complete", userId, itemId);
     }
 
     @GetMapping("/{itemId}")
     public ItemRequestDto get(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId) {
-        return itemRequestService.get(userId, itemId);
+        ItemRequestDto itemRequestDto = itemRequestService.get(userId, itemId);
+        log.info("ItemRequest get userId {}, itemId {} complete", userId, itemId);
+        return itemRequestDto;
+
     }
 
     @GetMapping("/search")
     public Collection<ItemRequestDto> search(@RequestParam(defaultValue = "") String text) {
-        return itemRequestService.search(text);
+        Collection<ItemRequestDto> itemRequestDtos = itemRequestService.search(text);
+        log.info("ItemRequest search text {} complete", text);
+        return itemRequestDtos;
     }
 }

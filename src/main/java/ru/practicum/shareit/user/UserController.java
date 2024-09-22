@@ -1,10 +1,13 @@
 package ru.practicum.shareit.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.NewUserRequest;
+import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
@@ -27,32 +30,29 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDto getById(@PathVariable long id) {
-        log.error("User get by id {} start", id);
+        log.info("User get by id {} start", id);
         return userService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@RequestBody UserDto userRequest) {
-        log.error("User create {} start", userRequest);
+    public UserDto create(@RequestBody @Valid NewUserRequest userRequest) {
         UserDto created = userService.create(userRequest);
-        log.error("Created user is {}", userRequest);
+        log.info("Created user is {}", userRequest.getEmail());
         return created;
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@RequestBody UserDto userRequest, @PathVariable long id) {
-        log.error("User update {}, id {} start", userRequest, id);
+    public UserDto update(@RequestBody @Valid UpdateUserRequest userRequest, @PathVariable long id) {
         UserDto updated = userService.update(userRequest, id);
-        log.error("Updated user is {}, id {} complete", userRequest, id);
+        log.info("Updated user is id {} complete", id);
         return updated;
     }
 
     @DeleteMapping("/{id}")
     public boolean userRemove(@PathVariable long id) {
-        log.error("Users remove user id {},start", id);
         boolean response = userService.remove(id);
-        log.error("Users remove user id {},complete", id);
+        log.info("Users remove user id {},complete", id);
         return response;
     }
 }

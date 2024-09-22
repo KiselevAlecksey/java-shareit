@@ -1,5 +1,6 @@
 package ru.practicum.shareit.review;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
@@ -24,33 +25,29 @@ public class ReviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewResponse create(@RequestBody NewReviewRequest reviewDto) {
-        log.error("Create review  {} start", reviewDto);
+    public ReviewResponse create(@RequestBody @Valid NewReviewRequest reviewDto) {
         ReviewResponse created = reviewService.create(reviewDto);
-        log.error("Created review is {} complete", created.getId());
+        log.info("Created review is {} complete", created.getId());
         return created;
     }
 
     @PatchMapping
-    public ReviewResponse update(@RequestBody UpdateReviewRequest reviewRequest) {
-        log.error("Update review {} start", reviewRequest);
+    public ReviewResponse update(@RequestBody @Valid UpdateReviewRequest reviewRequest) {
         ReviewResponse updated = reviewService.update(reviewRequest);
-        log.error("Updated review is {} complete", updated.getId());
+        log.info("Updated review is {} complete", updated.getId());
         return updated;
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        log.error("Delete review id {} start", id);
         reviewService.delete(id);
-        log.error("Deleted review id is {} complete", id);
+        log.info("Deleted review id is {} complete", id);
     }
 
     @GetMapping("/{id}")
     public ReviewResponse getById(@PathVariable long id) {
-        log.error("Get review id {} start", id);
         ReviewResponse reviewDto = reviewService.getById(id);
-        log.error("Get review id is {} complete", id);
+        log.info("Get review id is {} complete", id);
         return reviewDto;
     }
 
@@ -60,16 +57,14 @@ public class ReviewController {
             @RequestParam(required = false) Long itemId,
             @RequestParam(defaultValue = "1") @Positive Integer count) {
 
-        log.error("Get all review by userId {}, itemId {}, count {} start", userId, itemId, count);
         Collection<ReviewResponse> reviewDto = reviewService.getReviews(userId, itemId, count);
-        log.error("Get all review by userId {}, itemId {}, count {} complete", userId, itemId, count);
+        log.info("Get all review by userId {}, itemId {}, count {} complete", userId, itemId, count);
         return reviewDto;
     }
 
     @PatchMapping("/{id}/{score}")
     public void addScore(@PathVariable long id, @PathVariable @Min(1) @Max(5) int score) {
-        log.error("Add score review id {}, score {} start", id, score);
         reviewService.addScore(id, score);
-        log.error("Added score review id {}, score {} complete", id, score);
+        log.info("Added score review id {}, score {} complete", id, score);
     }
 }

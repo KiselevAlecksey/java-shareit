@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,8 +16,6 @@ public class InMemBookingRepository implements BookingRepository {
 
     private final Map<Long, Booking> bookingMap;
 
-    private final ItemRepository itemRepository;
-
     @Override
     public Optional<Booking> create(Booking booking) {
         countId++;
@@ -27,12 +23,6 @@ public class InMemBookingRepository implements BookingRepository {
         booking.setId(countId);
 
         bookingMap.put(countId, booking);
-
-        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
-
-        itemRepository.saveBookingItem(booking.getOwnerId(), booking.getId(), item);
 
         return getBooking(countId);
     }
@@ -47,8 +37,6 @@ public class InMemBookingRepository implements BookingRepository {
 
         bookingMap.put(booking.getId(), booking);
 
-        updateItemRepository(booking);
-
         return getBooking(booking.getId());
     }
 
@@ -56,8 +44,6 @@ public class InMemBookingRepository implements BookingRepository {
 
     @Override
     public Optional<Booking> updateConfirm(Booking booking) {
-
-        updateItemRepository(booking);
 
         bookingMap.put(booking.getId(), booking);
 
@@ -71,11 +57,6 @@ public class InMemBookingRepository implements BookingRepository {
 
         bookingMap.remove(id);
 
-        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
-
-        itemRepository.deleteBookingItem(booking.getOwnerId(), booking.getId(), item);
     }
 
     private Optional<Booking> getBooking(Long bookingId) {
@@ -88,11 +69,5 @@ public class InMemBookingRepository implements BookingRepository {
         return Optional.of(booking);
     }
 
-    private void updateItemRepository(Booking booking) {
-        Item item = itemRepository.get(booking.getOwnerId(), booking.getItemId()).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
 
-        itemRepository.updateBookingItem(booking.getOwnerId(), booking.getId(), item);
-    }
 }

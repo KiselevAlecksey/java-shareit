@@ -1,15 +1,17 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
 import ru.practicum.shareit.validator.ValidName;
 
 @Data
-public class UpdateItemRequestDto {
+public class UpdateItemRequest {
 
     @ValidName
     String name;
 
     String description;
+
+    Boolean available;
 
     public boolean hasName() {
         return isNotBlank(name);
@@ -17,6 +19,10 @@ public class UpdateItemRequestDto {
 
     public boolean hasDescription() {
         return isNotBlank(description);
+    }
+
+    public boolean hasAvailable() {
+        return available != null;
     }
 
     boolean isNotBlank(String value) {
