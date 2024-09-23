@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.model;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,10 +16,8 @@ public class Booking {
 
     Long id;
 
-    @NotBlank
     Long ownerId;
 
-    @NotBlank
     Long itemId;
 
     Boolean available;
@@ -31,7 +28,6 @@ public class Booking {
     @Builder.Default
     Duration duration = Duration.ofDays(1);
 
-    @NotBlank
     Long consumerId;
 
     Boolean isConfirm;

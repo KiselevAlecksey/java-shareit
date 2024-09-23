@@ -1,7 +1,5 @@
 package ru.practicum.shareit.user.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,7 +19,5 @@ public class User {
 
     String name;
 
-    @NotBlank(message = "Email является обязательным")
-    @Email(message = "Некорректный формат email")
     String email;
 }

@@ -4,11 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponse;
-import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
-import ru.practicum.shareit.booking.dto.UpdateBookingRequest;
+import ru.practicum.shareit.util.Marker;
 
 /**
  * TODO Sprint add-bookings.
@@ -21,8 +22,9 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingResponse create(@RequestBody @Valid NewBookingRequest bookingRequest) {
+    public BookingResponse create(@RequestBody @Valid BookingDto bookingRequest) {
         BookingResponse created = bookingService.create(bookingRequest);
         log.info("Created booking {}", bookingRequest);
         return created;
@@ -36,7 +38,8 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}")
-    public BookingResponse update(@RequestBody @Valid UpdateBookingRequest bookingRequest, @PathVariable long id) {
+    @Validated({Marker.OnUpdate.class})
+    public BookingResponse update(@RequestBody @Valid BookingDto bookingRequest, @PathVariable long id) {
         BookingResponse updated = bookingService.update(bookingRequest, id);
         log.info("updated booking {}", bookingRequest);
         return updated;

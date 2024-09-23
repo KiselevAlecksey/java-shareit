@@ -5,9 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterConflictException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
-import ru.practicum.shareit.user.dto.NewUserRequest;
-import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDtoResponse;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.validator.Validator;
@@ -24,12 +23,12 @@ public class UserServiceImpl implements UserService {
     private final Validator validator;
 
     @Override
-    public Collection<UserDto> findAll() {
+    public Collection<UserDtoResponse> findAll() {
         return userRepository.findAll().stream().map(UserMapper::mapToUserDto).toList();
     }
 
     @Override
-    public UserDto getById(long id) {
+    public UserDtoResponse getById(long id) {
         User user = userRepository.getById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь не найден")
         );
@@ -38,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto create(NewUserRequest userRequest) {
+    public UserDtoResponse create(UserDto userRequest) {
 
         if (userRequest.getEmail() == null) {
             throw new ParameterNotValidException("email", "Поле email является обязательным");
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto update(UpdateUserRequest userRequest, Long id) {
+    public UserDtoResponse update(UserDto userRequest, Long id) {
 
         if (id == null) {
             throw new NotFoundException("Id должен быть указан");

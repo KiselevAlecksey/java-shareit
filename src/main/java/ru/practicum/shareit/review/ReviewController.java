@@ -9,9 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.review.dto.NewReviewRequest;
+import ru.practicum.shareit.review.dto.ReviewDto;
 import ru.practicum.shareit.review.dto.ReviewResponse;
 import ru.practicum.shareit.review.dto.UpdateReviewRequest;
+import ru.practicum.shareit.util.Marker;
 
 import java.util.Collection;
 
@@ -24,17 +25,20 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
-    public ReviewResponse create(@RequestBody @Valid NewReviewRequest reviewDto) {
+    public ReviewResponse create(@RequestBody @Valid ReviewDto reviewDto) {
         ReviewResponse created = reviewService.create(reviewDto);
-        log.info("Created review is {} complete", created.getId());
+        log.info("Created review is {} complete", created.id());
         return created;
     }
 
-    @PatchMapping
-    public ReviewResponse update(@RequestBody @Valid UpdateReviewRequest reviewRequest) {
-        ReviewResponse updated = reviewService.update(reviewRequest);
-        log.info("Updated review is {} complete", updated.getId());
+
+    @PatchMapping("/{id}")
+    @Validated({Marker.OnUpdate.class})
+    public ReviewResponse update(@RequestBody @Valid UpdateReviewRequest reviewRequest, @PathVariable long id) {
+        ReviewResponse updated = reviewService.update(reviewRequest, id);
+        log.info("Updated review is {} complete", id);
         return updated;
     }
 

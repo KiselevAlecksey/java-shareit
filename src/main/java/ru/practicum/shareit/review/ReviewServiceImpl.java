@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.review.dto.NewReviewRequest;
+import ru.practicum.shareit.review.dto.ReviewDto;
 import ru.practicum.shareit.review.dto.ReviewResponse;
 import ru.practicum.shareit.review.dto.UpdateReviewRequest;
 import ru.practicum.shareit.review.mapper.ReviewMapper;
@@ -23,7 +23,7 @@ public class ReviewServiceImpl implements ReviewService {
     final Validator validator;
 
     @Override
-    public ReviewResponse create(NewReviewRequest reviewRequest) {
+    public ReviewResponse create(ReviewDto reviewRequest) {
 
         validator.validateReviewRequest(reviewRequest);
 
@@ -37,11 +37,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewResponse update(UpdateReviewRequest reviewRequest) {
+    public ReviewResponse update(UpdateReviewRequest reviewRequest, long id) {
 
-        validator.validateReviewRequest(reviewRequest);
-
-        Review review = reviewRepository.getById(reviewRequest.getId())
+        Review review = reviewRepository.getById(id)
                 .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
 
         ReviewMapper.updateReviewFields(review, reviewRequest);

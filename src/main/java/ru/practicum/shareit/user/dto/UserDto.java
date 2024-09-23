@@ -1,23 +1,31 @@
 package ru.practicum.shareit.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.util.Marker;
+import ru.practicum.shareit.validator.ValidString;
 
-@Data
+@Getter
+@Setter
+@ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode(of = "id")
 public class UserDto {
 
+    @Null(groups = {Marker.OnCreate.class})
     Long id;
 
+    @ValidString(groups = {Marker.OnUpdate.class})
+    @NotBlank(groups = {Marker.OnCreate.class})
     String name;
 
-    @NotBlank(message = "Email является обязательным")
-    @Email(message = "Некорректный формат email")
+    @Email(groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
+    @NotNull(groups = {Marker.OnCreate.class})
     String email;
 
     public boolean hasName() {

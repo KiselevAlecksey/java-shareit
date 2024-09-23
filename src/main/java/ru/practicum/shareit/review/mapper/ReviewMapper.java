@@ -2,8 +2,8 @@ package ru.practicum.shareit.review.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.review.dto.ReviewDto;
 import ru.practicum.shareit.review.model.Review;
-import ru.practicum.shareit.review.dto.NewReviewRequest;
 import ru.practicum.shareit.review.dto.ReviewResponse;
 import ru.practicum.shareit.review.dto.ReviewWithUserIdResponse;
 import ru.practicum.shareit.review.dto.UpdateReviewRequest;
@@ -11,7 +11,7 @@ import ru.practicum.shareit.review.dto.UpdateReviewRequest;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewMapper {
 
-    public static Review mapToReview(NewReviewRequest review) {
+    public static Review mapToReview(ReviewDto review) {
 
         return Review.builder()
                 .content(review.getContent())
@@ -24,38 +24,24 @@ public class ReviewMapper {
                 .build();
     }
 
-    public static Review mapToReview(ReviewResponse review) {
-
-        return Review.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .isComplete(review.getIsComplete())
-                .isPositive(review.getIsPositive())
-                .useful(review.getUseful())
-                .build();
-    }
-
     public static ReviewResponse mapToReviewResponse(Review review) {
-        ReviewResponse dto = new ReviewResponse();
-        dto.setId(review.getId());
-        dto.setContent(review.getContent());
-        dto.setIsComplete(review.getIsComplete());
-        dto.setIsPositive(review.getIsPositive());
-        dto.setUseful(review.getUseful());
-
-        return dto;
+        return new ReviewResponse(
+                review.getId(),
+                review.getContent(),
+                review.getIsComplete(),
+                review.getIsPositive(),
+                review.getUseful());
     }
 
     public static ReviewWithUserIdResponse mapToReviewWithUserIdDtoDto(Review review) {
-        ReviewWithUserIdResponse dto = new ReviewWithUserIdResponse();
-        dto.setId(review.getId());
-        dto.setContent(review.getContent());
-        dto.setIsComplete(review.getIsComplete());
-        dto.setIsPositive(review.getIsPositive());
-        dto.setConsumerId(review.getConsumerId());
-        dto.setUseful(review.getUseful());
-
-        return dto;
+        return new ReviewWithUserIdResponse(
+                review.getId(),
+                review.getContent(),
+                review.getIsComplete(),
+                review.getIsPositive(),
+                review.getUseful(),
+                review.getConsumerId()
+                );
     }
 
     public static Review updateReviewFields(Review review, UpdateReviewRequest request) {

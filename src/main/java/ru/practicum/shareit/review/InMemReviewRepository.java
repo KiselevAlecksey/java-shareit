@@ -18,7 +18,6 @@ public class InMemReviewRepository implements ReviewRepository {
 
     private final Map<Long, List<Integer>> scoreMap;
 
-
     @Override
     public Optional<Review> create(Review review) {
 

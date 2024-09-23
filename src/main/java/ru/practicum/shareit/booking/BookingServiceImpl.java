@@ -4,10 +4,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponse;
-import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
-import ru.practicum.shareit.booking.dto.UpdateBookingRequest;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -23,7 +22,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
 
     @Override
-    public BookingResponse create(NewBookingRequest bookingRequest) {
+    public BookingResponse create(BookingDto bookingRequest) {
 
         //validator.validateBookingRequest(bookingRequest);
 
@@ -53,7 +52,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse update(UpdateBookingRequest bookingRequest, long id) {
+    public BookingResponse update(BookingDto bookingRequest, long id) {
 
         //validator.validateBookingRequest(bookingRequest);
 

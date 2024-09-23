@@ -1,28 +1,16 @@
 package ru.practicum.shareit.review.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+public record ReviewWithUserIdResponse(
 
-@Data
-public class ReviewWithUserIdResponse {
+    Long id,
 
-    Long id;
+    String content,
 
-    @NotBlank
-    String content;
+    Boolean isComplete,
 
-    @NotNull
-    @JsonProperty("isComplete")
-    Boolean isComplete;
+    Boolean isPositive,
 
-    @NotNull
-    @JsonProperty("isPositive")
-    Boolean isPositive;
+    String useful,
 
-    String useful;
-
-    @NotNull
-    Long consumerId;
+    Long consumerId) {
 }

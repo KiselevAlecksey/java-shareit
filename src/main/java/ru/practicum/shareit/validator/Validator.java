@@ -2,16 +2,15 @@ package ru.practicum.shareit.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookingRequest;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.ConditionsNotMetException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.review.dto.NewReviewRequest;
-import ru.practicum.shareit.review.dto.ReviewRequest;
+import ru.practicum.shareit.review.dto.ReviewDto;
 import ru.practicum.shareit.user.UserRepository;
 
-import ru.practicum.shareit.user.dto.UserRequest;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class Validator {
 
     private final ItemRepository itemRepository;
 
-    public void validateUserRequest(UserRequest userRequest) {
+    public void validateUserRequest(UserDto userRequest) {
         StringBuilder errorMessage = new StringBuilder();
 
         if (isEmailInvalid(userRequest.getEmail())) {
@@ -38,7 +37,7 @@ public class Validator {
         return email.isBlank() || email.indexOf('@') == -1;
     }
 
-    public void validateBookingRequest(BookingRequest bookingRequest) {
+    public void validateBookingRequest(BookingDto bookingRequest) {
         StringBuilder errorMessage = new StringBuilder();
 
         if (isOwnerInvalid(bookingRequest)) {
@@ -50,7 +49,7 @@ public class Validator {
         }
     }
 
-    private boolean isOwnerInvalid(BookingRequest bookingRequest) {
+    private boolean isOwnerInvalid(BookingDto bookingRequest) {
         Long id = bookingRequest.getOwnerId();
 
         if (id == null) {
@@ -64,29 +63,19 @@ public class Validator {
         return userRepository.getById(id).isEmpty();
     }
 
-    public void validateReviewRequest(ReviewRequest reviewRequest) {
+    public void validateReviewRequest(ReviewDto reviewRequest) {
         StringBuilder errorMessage = new StringBuilder();
 
-        if (isContentInvalid(reviewRequest)) {
-            throw new ConditionsNotMetException("Неверное содержание отзыва");
+        if (isConsumerInvalid(reviewRequest)) {
+            errorMessage.append("Неверный id пользователя, ");
         }
 
-        if (isIsPositiveInvalid(reviewRequest)) {
-            throw new ConditionsNotMetException("Отсутствует поле оценка");
+        if (isOwnerInvalid(reviewRequest)) {
+            errorMessage.append("Неверный id владельца, ");
         }
 
-        if (reviewRequest instanceof NewReviewRequest) {
-            if (isConsumerInvalid(reviewRequest)) {
-                errorMessage.append("Неверный id пользователя, ");
-            }
-
-            if (isOwnerInvalid(reviewRequest)) {
-                errorMessage.append("Неверный id владельца, ");
-            }
-
-            if (isItemInvalid(reviewRequest)) {
-                errorMessage.append("Неверный id предмета, ");
-            }
+        if (isItemInvalid(reviewRequest)) {
+            errorMessage.append("Неверный id предмета, ");
         }
 
         if (!errorMessage.isEmpty()) {
@@ -94,15 +83,7 @@ public class Validator {
         }
     }
 
-    private boolean isIsPositiveInvalid(ReviewRequest reviewRequest) {
-        return reviewRequest.getIsPositive() == null;
-    }
-
-    private boolean isContentInvalid(ReviewRequest reviewRequest) {
-        return reviewRequest.getContent() == null || reviewRequest.getContent().isBlank();
-    }
-
-    private boolean isConsumerInvalid(ReviewRequest reviewRequest) {
+    private boolean isConsumerInvalid(ReviewDto reviewRequest) {
         Long id = reviewRequest.getConsumerId();
 
         if (id == null) {
@@ -116,7 +97,7 @@ public class Validator {
         return userRepository.getById(id).isEmpty();
     }
 
-    private boolean isOwnerInvalid(ReviewRequest reviewRequest) {
+    private boolean isOwnerInvalid(ReviewDto reviewRequest) {
         Long id = reviewRequest.getOwnerId();
 
         if (id == null) {
@@ -130,7 +111,7 @@ public class Validator {
         return userRepository.getById(id).isEmpty();
     }
 
-    private boolean isItemInvalid(ReviewRequest reviewRequest) {
+    private boolean isItemInvalid(ReviewDto reviewRequest) {
         Long id = reviewRequest.getItemId();
 
         if (id == null) {

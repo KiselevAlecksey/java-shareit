@@ -6,9 +6,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -31,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoResponse add(Long userId, NewItemRequest itemDto) {
+    public ItemDtoResponse add(Long userId, ItemDto itemDto) {
 
         if (userId == null || userRepository.getById(userId).isEmpty()) {
             throw new NotFoundException("Пользователь не найден");
@@ -63,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoResponse update(Long userId, Long itemId, UpdateItemRequest itemDto) {
+    public ItemDtoResponse update(Long userId, Long itemId, ItemDto itemDto) {
 
         if (userId == null) {
             throw new NotFoundException("Пользователь должен быть указан");

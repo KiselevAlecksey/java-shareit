@@ -1,39 +1,23 @@
 package ru.practicum.shareit.booking.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-
 import java.time.Instant;
 
-@Data
-public class BookingResponse {
+public record BookingResponse(
+        Long id,
 
-    Long id;
+        Long ownerId,
 
-    @NotBlank
-    Long ownerId;
+        Long itemId,
 
-    @NotBlank
-    Long itemId;
+        Boolean available,
 
-    @NotNull
-    Boolean available;
+        Instant startBooking,
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    Instant startBooking;
+        Long duration,
 
-    Long duration;
+        Long consumerId,
 
-    @NotBlank
-    Long consumerId;
+        Boolean isConfirm,
 
-    @NotNull
-    @JsonProperty("isComplete")
-    Boolean isConfirm;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    Instant confirmTime = Instant.now().plusMillis(86_400_000L);
+        Instant confirmTime) {
 }

@@ -4,10 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.util.Marker;
 
 import java.util.Collection;
 
@@ -27,20 +28,22 @@ public class ItemController {
     }
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDtoResponse add(
             @RequestHeader("X-Sharer-User-Id") long userId,
-            @RequestBody @Valid NewItemRequest item) {
+            @RequestBody @Valid ItemDto item) {
         ItemDtoResponse dto = itemService.add(userId, item);
         log.info("Item created {} complete", item);
         return dto;
     }
 
     @PatchMapping("/{itemId}")
+    @Validated({Marker.OnUpdate.class})
     public ItemDtoResponse update(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId,
-            @RequestBody @Valid UpdateItemRequest item) {
+            @RequestBody @Valid ItemDto item) {
 
         ItemDtoResponse dtoResponse = itemService.update(userId, itemId, item);
         log.info("Item updated {} complete", item);

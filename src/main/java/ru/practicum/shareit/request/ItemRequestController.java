@@ -4,10 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.NewItemRequestDto;
-import ru.practicum.shareit.request.dto.UpdateItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
+import ru.practicum.shareit.util.Marker;
 
 import java.util.Collection;
 
@@ -24,27 +25,29 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @GetMapping
-    public Collection<ItemRequestDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public Collection<ItemRequestDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemRequestService.getAll(userId);
     }
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemRequestDto add(
+    public ItemRequestDtoResponse add(
             @RequestHeader("X-Sharer-User-Id") long userId,
-            @RequestBody @Valid NewItemRequestDto item) {
-        ItemRequestDto dto = itemRequestService.add(userId, item);
+            @RequestBody @Valid ItemRequestDto item) {
+        ItemRequestDtoResponse dto = itemRequestService.add(userId, item);
         log.info("Item create {} complete", item);
         return dto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemRequestDto update(
+    @Validated({Marker.OnUpdate.class})
+    public ItemRequestDtoResponse update(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId,
-            @RequestBody @Valid UpdateItemRequestDto item) {
+            @RequestBody @Valid ItemRequestDto item) {
 
-        ItemRequestDto itemRequestDto = itemRequestService.update(userId, itemId, item);
+        ItemRequestDtoResponse itemRequestDto = itemRequestService.update(userId, itemId, item);
         log.info("ItemRequest updated {} complete", item);
         return itemRequestDto;
 
@@ -59,18 +62,18 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemRequestDto get(
+    public ItemRequestDtoResponse get(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId) {
-        ItemRequestDto itemRequestDto = itemRequestService.get(userId, itemId);
+        ItemRequestDtoResponse itemRequestDto = itemRequestService.get(userId, itemId);
         log.info("ItemRequest get userId {}, itemId {} complete", userId, itemId);
         return itemRequestDto;
 
     }
 
     @GetMapping("/search")
-    public Collection<ItemRequestDto> search(@RequestParam(defaultValue = "") String text) {
-        Collection<ItemRequestDto> itemRequestDtos = itemRequestService.search(text);
+    public Collection<ItemRequestDtoResponse> search(@RequestParam(defaultValue = "") String text) {
+        Collection<ItemRequestDtoResponse> itemRequestDtos = itemRequestService.search(text);
         log.info("ItemRequest search text {} complete", text);
         return itemRequestDtos;
     }

@@ -2,10 +2,9 @@ package ru.practicum.shareit.booking.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponse;
-import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
-import ru.practicum.shareit.booking.dto.UpdateBookingRequest;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.Duration;
@@ -13,7 +12,7 @@ import java.time.Duration;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookingMapper {
 
-    public static Booking mapToBooking(NewBookingRequest booking) {
+    public static Booking mapToBooking(BookingDto booking) {
 
         return Booking.builder()
                 .ownerId(booking.getOwnerId())
@@ -22,11 +21,10 @@ public class BookingMapper {
                 .startBooking(booking.getStartBooking())
                 .duration(Duration.ofMillis(booking.getDuration()))
                 .consumerId(booking.getConsumerId())
-                .confirmTime(booking.getConfirmTime())
                 .build();
     }
 
-    public static Booking mapToBooking(BookingResponse booking) {
+    /*public static Booking mapToBooking(BookingResponse booking) {
 
         return Booking.builder()
                 .id(booking.getId())
@@ -38,23 +36,23 @@ public class BookingMapper {
                 .consumerId(booking.getConsumerId())
                 .confirmTime(booking.getConfirmTime())
                 .build();
-    }
+    }*/
 
     public static BookingResponse mapToBookingResponse(Booking booking) {
-        BookingResponse dto = new BookingResponse();
-        dto.setId(booking.getId());
-        dto.setOwnerId(booking.getOwnerId());
-        dto.setItemId(booking.getItemId());
-        dto.setAvailable(booking.getAvailable());
-        dto.setStartBooking(booking.getStartBooking());
-        dto.setDuration(booking.getDuration().toMillis());
-        dto.setConsumerId(booking.getConsumerId());
-        dto.setConfirmTime(booking.getConfirmTime());
-
-        return dto;
+        return new BookingResponse(
+                booking.getId(),
+                booking.getOwnerId(),
+                booking.getItemId(),
+                booking.getAvailable(),
+                booking.getStartBooking(),
+                booking.getDuration().toMillis(),
+                booking.getConsumerId(),
+                booking.getIsConfirm(),
+                booking.getConfirmTime()
+        );
     }
 
-    public static Booking updateBookingFields(Booking booking, UpdateBookingRequest request) {
+    public static Booking updateBookingFields(Booking booking, BookingDto request) {
         if (request.hasDuration()) {
             booking.setDuration(Duration.ofMillis(request.getDuration()));
         }

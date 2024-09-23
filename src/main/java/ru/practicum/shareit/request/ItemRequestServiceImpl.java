@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.NewItemRequestDto;
-import ru.practicum.shareit.request.dto.UpdateItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
@@ -25,14 +24,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     final UserRepository userRepository;
 
     @Override
-    public Collection<ItemRequestDto> getAll(long userId) {
+    public Collection<ItemRequestDtoResponse> getAll(long userId) {
         return itemRepository.getAll(userId).stream()
                 .map(ItemRequestMapper::mapToItemDto)
                 .toList();
     }
 
     @Override
-    public ItemRequestDto add(Long userId, NewItemRequestDto itemDto) {
+    public ItemRequestDtoResponse add(Long userId, ItemRequestDto itemDto) {
 
         if (userId == null || userRepository.getById(userId).isEmpty()) {
             throw new NotFoundException("Пользователь не найден");
@@ -60,7 +59,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequestDto update(Long userId, Long itemId, UpdateItemRequestDto itemDto) {
+    public ItemRequestDtoResponse update(Long userId, Long itemId, ItemRequestDto itemDto) {
 
         if (userId == null) {
             throw new NotFoundException("Пользователь должен быть указан");
@@ -98,7 +97,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequestDto get(long userId, long itemId) {
+    public ItemRequestDtoResponse get(long userId, long itemId) {
         ItemRequest item = itemRepository.get(userId, itemId).orElseThrow(
                 () -> new NotFoundException("Предмет не найден")
         );
@@ -107,7 +106,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public Collection<ItemRequestDto> search(String text) {
+    public Collection<ItemRequestDtoResponse> search(String text) {
         return itemRepository.search(text).stream()
                 .map(ItemRequestMapper::mapToItemDto)
                 .toList();

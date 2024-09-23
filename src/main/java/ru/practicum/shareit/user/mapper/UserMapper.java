@@ -2,37 +2,30 @@ package ru.practicum.shareit.user.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.dto.NewUserRequest;
-import ru.practicum.shareit.user.dto.UpdateUserRequest;
+import ru.practicum.shareit.user.dto.UserDtoResponse;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserMapper {
 
-    public static User mapToUser(NewUserRequest request) {
+    public static User mapToUser(UserDto request) {
         return User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
                 .build();
     }
 
-    public static User mapToUser(UpdateUserRequest request) {
-        return User.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .build();
+    public static UserDtoResponse mapToUserDto(User user) {
+
+        return new UserDtoResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
     }
 
-    public static UserDto mapToUserDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        return dto;
-    }
-
-    public static User updateUserFields(User user, UpdateUserRequest request) {
+    public static User updateUserFields(User user, UserDto request) {
 
         if (request.hasEmail()) {
             user.setEmail(request.getEmail());

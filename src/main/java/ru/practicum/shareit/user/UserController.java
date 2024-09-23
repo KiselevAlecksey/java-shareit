@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.NewUserRequest;
-import ru.practicum.shareit.user.dto.UpdateUserRequest;
+import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.util.Marker;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Collection;
@@ -24,27 +24,29 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Collection<UserDto> findAll() {
+    public Collection<UserDtoResponse> findAll() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public UserDto getById(@PathVariable long id) {
+    public UserDtoResponse getById(@PathVariable long id) {
         log.info("User get by id {} start", id);
         return userService.getById(id);
     }
 
     @PostMapping
+    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@RequestBody @Valid NewUserRequest userRequest) {
-        UserDto created = userService.create(userRequest);
+    public UserDtoResponse create(@RequestBody @Valid UserDto userRequest) {
+        UserDtoResponse created = userService.create(userRequest);
         log.info("Created user is {}", userRequest.getEmail());
         return created;
     }
 
+    @Validated({Marker.OnUpdate.class})
     @PatchMapping("/{id}")
-    public UserDto update(@RequestBody @Valid UpdateUserRequest userRequest, @PathVariable long id) {
-        UserDto updated = userService.update(userRequest, id);
+    public UserDtoResponse update(@RequestBody @Valid UserDto userRequest, @PathVariable long id) {
+        UserDtoResponse updated = userService.update(userRequest, id);
         log.info("Updated user is id {} complete", id);
         return updated;
     }

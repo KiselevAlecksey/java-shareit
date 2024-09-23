@@ -37,7 +37,7 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
 
         ItemRequest saveItem = item.toBuilder()
                 .id(++countId)
-                .ownerId(userId)
+                .userId(userId)
                 .build();
 
         Map<Long, ItemRequest> map = itemMap.computeIfAbsent(userId, v -> new HashMap<>());
