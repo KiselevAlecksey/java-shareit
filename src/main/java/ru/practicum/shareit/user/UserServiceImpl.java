@@ -5,13 +5,12 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterConflictException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.NewUserDtoRequest;
+import ru.practicum.shareit.user.dto.UpdateUserDtoRequest;
 import ru.practicum.shareit.user.dto.UserDtoResponse;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.validator.Validator;
 
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -20,70 +19,56 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final Validator validator;
+    private final UserMapper userMapper;
 
     @Override
-    public Collection<UserDtoResponse> findAll() {
-        return userRepository.findAll().stream().map(UserMapper::mapToUserDto).toList();
+    public List<UserDtoResponse> findAll() {
+        return userRepository.findAll().stream().map(userMapper::mapToUserDto).toList();
     }
 
     @Override
     public UserDtoResponse getById(long id) {
-        User user = userRepository.getById(id).orElseThrow(
-                () -> new NotFoundException("Пользователь не найден")
-        );
+        User user = userRepository.getById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        return UserMapper.mapToUserDto(user);
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
-    public UserDtoResponse create(UserDto userRequest) {
+    public UserDtoResponse create(NewUserDtoRequest userRequest) {
 
         if (userRequest.getEmail() == null) {
             throw new ParameterNotValidException("email", "Поле email является обязательным");
         }
 
-        User user = UserMapper.mapToUser(userRequest);
+        User user = userMapper.mapToUser(userRequest);
 
-        validateEmailConflict(user);
+        checkEmailConflict(user);
 
-        validator.validateUserRequest(userRequest);
+        User userCreated = userRepository.create(user);
 
-        User userCreated = userRepository.create(user).orElseThrow(
-                () -> new NotFoundException("Пользователь не найден")
-        );
-
-        return UserMapper.mapToUserDto(userCreated);
+        return userMapper.mapToUserDto(userCreated);
     }
 
     @Override
-    public UserDtoResponse update(UserDto userRequest, Long id) {
+    public UserDtoResponse update(UpdateUserDtoRequest userRequest) {
 
-        if (id == null) {
-            throw new NotFoundException("Id должен быть указан");
-        }
+        if (userRepository.getById(userRequest.getId()).isPresent()) {
 
-        if (userRepository.getById(id).isPresent()) {
-
-            validator.validateUserRequest(userRequest);
-
-            User userUpdated = userRepository.getById(id)
-                    .orElseThrow(() -> new NotFoundException("Пользователь не найден")
-                    );
+            User userUpdated = userRepository.getById(userRequest.getId())
+                    .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
             if (!(userUpdated.getEmail().equals(userRequest.getEmail()))) {
-                validateEmailConflict(UserMapper.mapToUser(userRequest));
+                checkEmailConflict(userMapper.mapToUser(userRequest));
             }
 
-            UserMapper.updateUserFields(userUpdated, userRequest);
+            userMapper.updateUserFields(userUpdated, userRequest);
 
-            User user = userRepository.update(userUpdated)
-                    .orElseThrow(() -> new NotFoundException("Пользователь не найден")
-                    );
+            User user = userRepository.update(userUpdated);
 
-            return UserMapper.mapToUserDto(user);
+            return userMapper.mapToUserDto(user);
         }
-        throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        throw new NotFoundException("Пользователь с id = " + userRequest.getId() + " не найден");
     }
 
     @Override
@@ -91,7 +76,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.remove(id);
     }
 
-    private void validateEmailConflict(User user) {
+    private void checkEmailConflict(User user) {
         List<User> users = userRepository.findAll().stream()
                 .filter(user1 -> user1.getEmail().equals(user.getEmail()))
                 .toList();

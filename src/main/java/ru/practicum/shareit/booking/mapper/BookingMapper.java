@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
@@ -9,10 +10,11 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.Duration;
 
+@Component
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookingMapper {
 
-    public static Booking mapToBooking(BookingDto booking) {
+    public Booking mapToBooking(BookingDto booking) {
 
         return Booking.builder()
                 .ownerId(booking.getOwnerId())
@@ -24,21 +26,7 @@ public class BookingMapper {
                 .build();
     }
 
-    /*public static Booking mapToBooking(BookingResponse booking) {
-
-        return Booking.builder()
-                .id(booking.getId())
-                .ownerId(booking.getOwnerId())
-                .itemId(booking.getItemId())
-                .available(booking.getAvailable())
-                .startBooking(booking.getStartBooking())
-                .duration(Duration.ofMillis(booking.getDuration()))
-                .consumerId(booking.getConsumerId())
-                .confirmTime(booking.getConfirmTime())
-                .build();
-    }*/
-
-    public static BookingResponse mapToBookingResponse(Booking booking) {
+    public BookingResponse mapToBookingResponse(Booking booking) {
         return new BookingResponse(
                 booking.getId(),
                 booking.getOwnerId(),
@@ -52,7 +40,7 @@ public class BookingMapper {
         );
     }
 
-    public static Booking updateBookingFields(Booking booking, BookingDto request) {
+    public Booking updateBookingFields(Booking booking, BookingDto request) {
         if (request.hasDuration()) {
             booking.setDuration(Duration.ofMillis(request.getDuration()));
         }
@@ -63,7 +51,7 @@ public class BookingMapper {
         return booking;
     }
 
-    public static Booking updateBookingConfirm(Booking booking, UpdateBookingConfirmResponse request) {
+    public Booking updateBookingConfirm(Booking booking, UpdateBookingConfirmResponse request) {
         if (request.hasIsConfirm()) {
             booking.setIsConfirm(request.getIsConfirm());
         }

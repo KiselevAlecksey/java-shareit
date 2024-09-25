@@ -2,30 +2,28 @@ package ru.practicum.shareit.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.util.Marker;
-import ru.practicum.shareit.validator.ValidString;
 
 @Getter
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDto {
+public class UpdateUserDtoRequest {
 
-    @Null(groups = {Marker.OnCreate.class})
+    @Null
     Long id;
 
-    @ValidString(groups = {Marker.OnUpdate.class})
-    @NotBlank(groups = {Marker.OnCreate.class})
+    @Size(min = 1)
     String name;
 
-    @Email(groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
-    @NotNull(groups = {Marker.OnCreate.class})
+    @Email
     String email;
 
     public boolean hasName() {

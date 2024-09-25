@@ -19,14 +19,16 @@ import java.util.Collection;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequestServiceImpl implements ItemRequestService {
 
-    final ItemRequestRepository itemRepository;
+    ItemRequestRepository itemRepository;
 
-    final UserRepository userRepository;
+    UserRepository userRepository;
+
+    ItemRequestMapper itemRequestMapper;
 
     @Override
     public Collection<ItemRequestDtoResponse> getAll(long userId) {
         return itemRepository.getAll(userId).stream()
-                .map(ItemRequestMapper::mapToItemDto)
+                .map(itemRequestMapper::mapToItemDto)
                 .toList();
     }
 
@@ -49,13 +51,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new ParameterNotValidException("description", "Описание должно быть указано");
         }
 
-        ItemRequest item = ItemRequestMapper.mapToItem(itemDto);
+        ItemRequest item = itemRequestMapper.mapToItem(itemDto);
 
-        ItemRequest itemCreated = itemRepository.add(userId, item).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
+        ItemRequest itemCreated = itemRepository.add(userId, item);
 
-        return ItemRequestMapper.mapToItemDto(itemCreated);
+        return itemRequestMapper.mapToItemDto(itemCreated);
     }
 
     @Override
@@ -73,17 +73,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException("Поля предмета должны быть указаны");
         }
 
-        ItemRequest item = itemRepository.get(userId, itemId).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
+        ItemRequest item = itemRepository.get(userId, itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        ItemRequestMapper.updateItemFields(item, itemDto);
+        itemRequestMapper.updateItemFields(item, itemDto);
 
-        ItemRequest itemUpdated = itemRepository.update(userId, itemId, item).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
+        ItemRequest itemUpdated = itemRepository.update(userId, itemId, item);
 
-        return ItemRequestMapper.mapToItemDto(itemUpdated);
+        return itemRequestMapper.mapToItemDto(itemUpdated);
     }
 
     @Override
@@ -98,17 +95,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDtoResponse get(long userId, long itemId) {
-        ItemRequest item = itemRepository.get(userId, itemId).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
+        ItemRequest item = itemRepository.get(userId, itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        return ItemRequestMapper.mapToItemDto(item);
+        return itemRequestMapper.mapToItemDto(item);
     }
 
     @Override
     public Collection<ItemRequestDtoResponse> search(String text) {
         return itemRepository.search(text).stream()
-                .map(ItemRequestMapper::mapToItemDto)
+                .map(itemRequestMapper::mapToItemDto)
                 .toList();
     }
 }

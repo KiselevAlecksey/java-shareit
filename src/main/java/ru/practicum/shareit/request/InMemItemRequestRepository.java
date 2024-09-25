@@ -1,6 +1,8 @@
 package ru.practicum.shareit.request;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -8,12 +10,12 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import java.util.*;
 
 @Repository
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemItemRequestRepository implements ItemRequestRepository {
 
-    private long countId = 0;
+    long countId = 0;
 
-    private final Map<Long, Map<Long, ItemRequest>> itemMap;
+    final Map<Long, Map<Long, ItemRequest>> itemMap = new HashMap<>();;
 
     @Override
     public Collection<ItemRequest> getAll(long userId) {
@@ -25,7 +27,7 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
     }
 
     @Override
-    public Optional<ItemRequest> add(long userId, ItemRequest item) {
+    public ItemRequest add(long userId, ItemRequest item) {
 
         boolean isExist = itemMap.values().stream()
                 .flatMap(map -> map.values().stream())
@@ -46,11 +48,11 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
 
         itemMap.put(userId, map);
 
-        return getItem(userId, saveItem.getId());
+        return get(userId, saveItem.getId()).orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
-    public Optional<ItemRequest> update(long userId, long itemId, ItemRequest item) {
+    public ItemRequest update(long userId, long itemId, ItemRequest item) {
         if (itemMap.get(userId) == null || itemMap.get(userId).get(itemId) == null) {
             throw new NotFoundException("Не удалось обновить предмет");
         }
@@ -61,7 +63,7 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
 
         itemMap.put(userId, map);
 
-        return getItem(userId, itemId);
+        return get(userId, itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
@@ -75,13 +77,19 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
 
     @Override
     public Optional<ItemRequest> get(long userId, long itemId) {
-        return getItem(userId, itemId);
+        Map<Long, ItemRequest> map = itemMap.get(userId);
+
+        if (map == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        return Optional.ofNullable(map.get(itemId));
     }
 
     @Override
     public Collection<ItemRequest> search(String text) {
 
-        if (text.isEmpty()) return new ArrayList<>();
+        if (text.isEmpty()) return Collections.emptyList();
 
         List<ItemRequest> items = itemMap.values().stream()
                 .map(Map::values)
@@ -122,21 +130,5 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
                 })
                 .toList();
         return searchedItems;
-    }
-
-    private Optional<ItemRequest> getItem(Long userId, Long itemId) {
-        Map<Long, ItemRequest> map = itemMap.get(userId);
-
-        if (map == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        ItemRequest item = map.get(itemId);
-
-        if (item == null) {
-            throw new NotFoundException("Предмет не найден");
-        }
-
-        return Optional.of(item);
     }
 }

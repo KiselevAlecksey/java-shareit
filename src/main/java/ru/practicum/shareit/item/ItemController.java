@@ -10,7 +10,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.util.Marker;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * TODO Sprint add-controllers.
@@ -23,7 +23,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public Collection<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getAll(userId);
     }
 
@@ -33,6 +33,8 @@ public class ItemController {
     public ItemDtoResponse add(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestBody @Valid ItemDto item) {
+
+        log.info("Item create {} start", item);
         ItemDtoResponse dto = itemService.add(userId, item);
         log.info("Item created {} complete", item);
         return dto;
@@ -44,7 +46,7 @@ public class ItemController {
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId,
             @RequestBody @Valid ItemDto item) {
-
+        log.info("Item update {} start", item);
         ItemDtoResponse dtoResponse = itemService.update(userId, itemId, item);
         log.info("Item updated {} complete", item);
         return dtoResponse;
@@ -54,6 +56,7 @@ public class ItemController {
     public void delete(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId) {
+
         itemService.delete(userId, itemId);
         log.info("Item deleted userId {}, itemId {} complete", userId, itemId);
     }
@@ -68,8 +71,8 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDtoResponse> search(@RequestParam(defaultValue = "") String text) {
-        Collection<ItemDtoResponse> itemDtoResponses = itemService.search(text);
+    public List<ItemDtoResponse> search(@RequestParam(defaultValue = "") String text) {
+        List<ItemDtoResponse> itemDtoResponses = itemService.search(text);
         log.info("Item search text {} complete", text);
         return itemDtoResponses;
     }

@@ -9,9 +9,9 @@ public interface ItemRequestRepository {
 
     Collection<ItemRequest> getAll(long userId);
 
-    Optional<ItemRequest> add(long userId, ItemRequest item);
+    ItemRequest add(long userId, ItemRequest item);
 
-    Optional<ItemRequest> update(long userId, long itemId, ItemRequest item);
+    ItemRequest update(long userId, long itemId, ItemRequest item);
 
     void delete(long userId, long itemId);
 

@@ -1,66 +1,34 @@
 package ru.practicum.shareit.booking;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
 public class InMemBookingRepository implements BookingRepository {
 
     private long countId = 0;
 
-    private final Map<Long, Booking> bookingMap;
+    private final Map<Long, Booking> bookingMap = new HashMap<>();
 
     @Override
-    public Optional<Booking> create(Booking booking) {
+    public Booking create(Booking booking) {
         countId++;
 
         booking.setId(countId);
 
         bookingMap.put(countId, booking);
 
-        return getBooking(countId);
+        return getById(countId).orElseThrow(() -> new NotFoundException("Не удалось создать бронь"));
     }
 
     @Override
     public Optional<Booking> getById(Long id) {
-        return getBooking(id);
-    }
-
-    @Override
-    public Optional<Booking> update(Booking booking) {
-
-        bookingMap.put(booking.getId(), booking);
-
-        return getBooking(booking.getId());
-    }
-
-
-
-    @Override
-    public Optional<Booking> updateConfirm(Booking booking) {
-
-        bookingMap.put(booking.getId(), booking);
-
-        return getBooking(booking.getId());
-    }
-
-    @Override
-    public void delete(Long id) {
-
         Booking booking = bookingMap.get(id);
-
-        bookingMap.remove(id);
-
-    }
-
-    private Optional<Booking> getBooking(Long bookingId) {
-        Booking booking = bookingMap.get(bookingId);
 
         if (booking == null) {
             throw new NotFoundException("Бронь не найдена");
@@ -69,5 +37,29 @@ public class InMemBookingRepository implements BookingRepository {
         return Optional.of(booking);
     }
 
+    @Override
+    public Booking update(Booking booking) {
 
+        bookingMap.put(booking.getId(), booking);
+
+        return getById(booking.getId()).orElseThrow(() -> new NotFoundException("Не удалось обновить бронь"));
+    }
+
+
+
+    @Override
+    public Booking updateConfirm(Booking booking) {
+
+        bookingMap.put(booking.getId(), booking);
+
+        return getById(booking.getId()).orElseThrow(() -> new NotFoundException("Не удалось обновить бронь"));
+    }
+
+    @Override
+    public void delete(Long id) {
+
+        getById(id).orElseThrow(() -> new NotFoundException("Не удалось получить бронь"));
+
+        bookingMap.remove(id);
+    }
 }

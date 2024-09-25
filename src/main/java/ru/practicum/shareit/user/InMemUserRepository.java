@@ -1,54 +1,43 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemUserRepository implements UserRepository {
-    private long countId = 0;
-    private final Map<Long, User> userMap;
+    long countId = 0;
 
-    public Collection<User> findAll() {
+    final Map<Long, User> userMap = new HashMap<>();
+
+    public List<User> findAll() {
         return userMap.values().stream().toList();
     }
 
-    public Optional<User> getById(Long id) {
-
-        return getUser(id);
+    public Optional<User> getById(long id) {
+        return Optional.ofNullable(userMap.get(id));
     }
 
-    public Optional<User> create(User user) {
+    public User create(User user) {
         countId++;
         user.setId(countId);
         userMap.put(countId, user);
-        return getUser(user.getId());
+        return getById(user.getId()).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
-    public Optional<User> update(User user) {
+    public User update(User user) {
 
         userMap.put(user.getId(), user);
 
-        return getUser(user.getId());
+        return getById(user.getId()).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
-    public boolean remove(Long id) {
+    public boolean remove(long id) {
         return userMap.remove(id) != null;
-    }
-
-    private Optional<User> getUser(Long userId) {
-        User user =  userMap.get(userId);
-
-        if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        return Optional.of(user);
     }
 }

@@ -12,7 +12,8 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,73 +21,35 @@ import java.util.Collection;
 public class ItemServiceImpl implements ItemService {
     final ItemRepository itemRepository;
 
-    final UserRepository userRepository;
+    final ItemMapper itemMapper;
 
     @Override
-    public Collection<ItemDtoResponse> getAll(long userId) {
+    public List<ItemDtoResponse> getAll(long userId) {
         return itemRepository.getAll(userId).stream()
-                .map(ItemMapper::mapToItemDto)
+                .map(itemMapper::mapToItemDto)
                 .toList();
     }
 
     @Override
-    public ItemDtoResponse add(Long userId, ItemDto itemDto) {
+    public ItemDtoResponse add(long userId, ItemDto itemDto) {
 
-        if (userId == null || userRepository.getById(userId).isEmpty()) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        Item item = itemMapper.mapToItem(itemDto);
 
-        if (itemDto == null) {
-            throw new NotFoundException("Невозможно сохранить пустой предмет");
-        }
+        Item itemCreated = itemRepository.save(userId, item);
 
-        if (itemDto.getAvailable() == null) {
-            throw new ParameterNotValidException("available", "Статус должен быть указан");
-        }
-
-        if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
-            throw new ParameterNotValidException("name", "Имя должно быть указано");
-        }
-
-        if (itemDto.getDescription() == null || itemDto.getDescription().isEmpty()) {
-            throw new ParameterNotValidException("description", "Описание должно быть указано");
-        }
-
-        Item item = ItemMapper.mapToItem(itemDto);
-
-        Item itemCreated = itemRepository.save(userId, item).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
-
-        return ItemMapper.mapToItemDto(itemCreated);
+        return itemMapper.mapToItemDto(itemCreated);
     }
 
     @Override
-    public ItemDtoResponse update(Long userId, Long itemId, ItemDto itemDto) {
+    public ItemDtoResponse update(long userId, long itemId, ItemDto itemDto) {
 
-        if (userId == null) {
-            throw new NotFoundException("Пользователь должен быть указан");
-        }
+        Item item = itemRepository.get(userId, itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        if (itemId == null) {
-            throw new NotFoundException("Предмет должен быть указан");
-        }
+        itemMapper.updateItemFields(item, itemDto);
 
-        if (itemDto == null) {
-            throw new NotFoundException("Поля предмета должны быть указаны");
-        }
-
-        Item item = itemRepository.get(userId, itemId).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
-
-        ItemMapper.updateItemFields(item, itemDto);
-
-        Item itemUpdated = itemRepository.update(userId, itemId, item).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
-
-        return ItemMapper.mapToItemDto(itemUpdated);
+        Item itemUpdated = itemRepository.update(userId, itemId, item);
+        return itemMapper.mapToItemDto(itemUpdated);
     }
 
     @Override
@@ -101,17 +64,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDtoResponse get(long userId, long itemId) {
-        Item item = itemRepository.get(userId, itemId).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
+        Item item = itemRepository.get(userId, itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        return ItemMapper.mapToItemDto(item);
+        return itemMapper.mapToItemDto(item);
     }
 
     @Override
-    public Collection<ItemDtoResponse> search(String text) {
+    public List<ItemDtoResponse> search(String text) {
         return itemRepository.search(text).stream()
-                .map(ItemMapper::mapToItemDto)
+                .map(itemMapper::mapToItemDto)
                 .toList();
     }
 }

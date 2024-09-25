@@ -12,12 +12,12 @@ import java.util.*;
 public class InMemItemRepository implements ItemRepository {
     private long countId = 0;
 
-    private final Map<Long, Map<Long, Item>> itemBookingMap;
+    private final Map<Long, Map<Long, Item>> itemBookingMap = new HashMap<>();;
 
-    private final Map<Long, Map<Long, Item>> itemMap;
+    private final Map<Long, Map<Long, Item>> itemMap = new HashMap<>();;
 
     @Override
-    public Collection<Item> getAll(long userId) {
+    public List<Item> getAll(long userId) {
         return itemMap.get(userId).values().stream()
                 .peek(item -> {
                     if (item == null) throw new NotFoundException("Предмет не найден");
@@ -26,7 +26,7 @@ public class InMemItemRepository implements ItemRepository {
     }
 
     @Override
-    public Optional<Item> saveBookingItem(Long ownerId, Long id, Item item) {
+    public Item saveBookingItem(long ownerId, long id, Item item) {
 
         Map<Long, Item> map = itemMap.get(ownerId);
 
@@ -36,11 +36,11 @@ public class InMemItemRepository implements ItemRepository {
 
         delete(ownerId, id);
 
-        return getBookingItem(ownerId, id);
+        return getBookingItem(ownerId, id).orElseThrow(() -> new NotFoundException("Преедмет не найден"));
     }
 
     @Override
-    public boolean deleteBookingItem(Long ownerId, Long id, Item item) {
+    public boolean deleteBookingItem(long ownerId, long id, Item item) {
 
         Map<Long, Item> mapBooking = itemBookingMap.get(ownerId);
 
@@ -61,7 +61,7 @@ public class InMemItemRepository implements ItemRepository {
     }
 
     @Override
-    public Optional<Item> updateBookingItem(Long ownerId, Long id, Item item) {
+    public Item updateBookingItem(long ownerId, long id, Item item) {
 
         if (itemMap.get(ownerId) == null || itemMap.get(ownerId).get(id) == null) {
             throw new NotFoundException("Не удалось обновить предмет");
@@ -73,11 +73,11 @@ public class InMemItemRepository implements ItemRepository {
 
         itemBookingMap.put(ownerId, mapBooking);
 
-        return getBookingItem(ownerId, id);
+        return getBookingItem(ownerId, id).orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
-    public Optional<Item> save(Long userId, Item item) {
+    public Item save(long userId, Item item) {
 
         boolean isExist = itemMap.values().stream()
                 .flatMap(map -> map.values().stream())
@@ -98,11 +98,11 @@ public class InMemItemRepository implements ItemRepository {
 
         itemMap.put(userId, map);
 
-        return getItem(userId, saveItem.getId());
+        return get(userId, saveItem.getId()).orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
-    public Optional<Item> update(Long userId, Long itemId, Item item) {
+    public Item update(long userId, long itemId, Item item) {
 
         if (itemMap.get(userId) == null || itemMap.get(userId).get(itemId) == null) {
             throw new NotFoundException("Не удалось обновить предмет");
@@ -114,7 +114,7 @@ public class InMemItemRepository implements ItemRepository {
 
         itemMap.put(userId, map);
 
-        return getItem(userId, itemId);
+        return get(userId, itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
@@ -127,15 +127,24 @@ public class InMemItemRepository implements ItemRepository {
     }
 
     @Override
-    public Optional<Item> get(Long userId, Long itemId) {
-        return getItem(userId, itemId);
+    public Optional<Item> get(long userId, long itemId) {
+        Map<Long, Item> map = itemMap.get(userId);
+
+        if (map == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        Item item = map.get(itemId);
+
+        return Optional.ofNullable(item);
     }
 
     @Override
-    public Collection<Item> search(String text) {
+    public List<Item> search(String text) {
 
-        if (text.isEmpty()) return new ArrayList<>();
+        if (text.isEmpty()) return Collections.emptyList();
 
+        // алгоритм поиска плохой
         List<Item> items = itemMap.values().stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
@@ -177,23 +186,7 @@ public class InMemItemRepository implements ItemRepository {
         return searchedItems;
     }
 
-    private Optional<Item> getItem(Long userId, Long itemId) {
-        Map<Long, Item> map = itemMap.get(userId);
-
-        if (map == null) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        Item item = map.get(itemId);
-
-        if (item == null) {
-            throw new NotFoundException("Предмет не найден");
-        }
-
-        return Optional.of(item);
-    }
-
-    private Optional<Item> getBookingItem(Long userId, Long itemId) {
+    private Optional<Item> getBookingItem(long userId, long itemId) {
         Map<Long, Item> map = itemBookingMap.get(userId);
 
         if (map == null) {
@@ -202,10 +195,6 @@ public class InMemItemRepository implements ItemRepository {
 
         Item item = map.get(itemId);
 
-        if (item == null) {
-            throw new NotFoundException("Предмет не найден");
-        }
-
-        return Optional.of(item);
+        return Optional.ofNullable(item);
     }
 }

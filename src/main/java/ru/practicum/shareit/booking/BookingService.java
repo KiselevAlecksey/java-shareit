@@ -8,11 +8,11 @@ public interface BookingService {
 
     BookingResponse create(BookingDto bookingRequest);
 
-    BookingResponse getById(Long id);
+    BookingResponse getById(long id);
 
     BookingResponse update(BookingDto bookingRequest, long id);
 
     BookingResponse updateConfirm(UpdateBookingConfirmResponse bookingRequest, long id);
 
-    void delete(Long id);
+    void delete(long id);
 }

@@ -6,13 +6,13 @@ import java.util.Optional;
 
 public interface BookingRepository {
 
-    Optional<Booking> create(Booking booking);
+    Booking create(Booking booking);
 
     Optional<Booking> getById(Long id);
 
-    Optional<Booking> update(Booking booking);
+    Booking update(Booking booking);
 
-    Optional<Booking> updateConfirm(Booking booking);
+    Booking updateConfirm(Booking booking);
 
     void delete(Long id);
 }
