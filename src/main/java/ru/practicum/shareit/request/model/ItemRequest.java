@@ -1,16 +1,18 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request.model;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.user.model.User;
 
+/**
+ * TODO Sprint add-item-requests.
+ */
 @Data
 @Builder(toBuilder = true)
-public class Item {
+public class ItemRequest {
 
     Long id;
 
-    User owner;
+    Long userId;
 
     String name;
 
