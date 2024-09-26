@@ -15,4 +15,6 @@ public interface UserRepository {
     User update(User user);
 
     boolean remove(long id);
+
+    List<String> getEmails();
 }

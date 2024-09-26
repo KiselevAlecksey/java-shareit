@@ -9,20 +9,16 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
-import ru.practicum.shareit.util.Marker;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public BookingResponse create(@RequestBody @Valid BookingDto bookingRequest) {
         BookingResponse created = bookingService.create(bookingRequest);
@@ -38,7 +34,6 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}")
-    @Validated({Marker.OnUpdate.class})
     public BookingResponse update(@RequestBody @Valid BookingDto bookingRequest, @PathVariable long id) {
         BookingResponse updated = bookingService.update(bookingRequest, id);
         log.info("updated booking {}", bookingRequest);

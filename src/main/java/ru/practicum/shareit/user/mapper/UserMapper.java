@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.dto.NewUserDtoRequest;
-import ru.practicum.shareit.user.dto.UpdateUserDtoRequest;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.dto.UserDtoResponse;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,14 +12,14 @@ import ru.practicum.shareit.user.model.User;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserMapper {
 
-    public User mapToUser(NewUserDtoRequest request) {
+    public User mapToUser(UserCreateDto request) {
         return User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
                 .build();
     }
 
-    public User mapToUser(UpdateUserDtoRequest request) {
+    public User mapToUser(UserUpdateDto request) {
         return User.builder()
                 .email(request.getEmail())
                 .name(request.getName())
@@ -34,7 +34,7 @@ public final class UserMapper {
         );
     }
 
-    public User updateUserFields(User user, UpdateUserDtoRequest request) {
+    public User updateUserFields(User user, UserUpdateDto request) {
 
         if (request.hasEmail()) {
             user.setEmail(request.getEmail());

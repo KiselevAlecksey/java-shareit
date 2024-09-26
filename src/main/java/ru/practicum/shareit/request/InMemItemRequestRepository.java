@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,7 +14,7 @@ public class InMemItemRequestRepository implements ItemRequestRepository {
 
     long countId = 0;
 
-    final Map<Long, Map<Long, ItemRequest>> itemMap = new HashMap<>();;
+    final Map<Long, Map<Long, ItemRequest>> itemMap = new HashMap<>();
 
     @Override
     public Collection<ItemRequest> getAll(long userId) {

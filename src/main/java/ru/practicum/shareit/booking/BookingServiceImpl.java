@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException("Предмет не найден")
         );
 
-        itemRepository.saveBookingItem(booking.getOwnerId(), booking.getId(), item);
+        itemRepository.saveBookingItem(item);
 
         return bookingMapper.mapToBookingResponse(bookingCreated);
     }
@@ -96,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException("Предмет не найден")
         );
 
-        itemRepository.deleteBookingItem(booking.getOwnerId(), booking.getId(), item);
+        itemRepository.deleteBookingItem(item);
 
         bookingRepository.delete(id);
     }
@@ -106,6 +106,6 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException("Предмет не найден")
         );
 
-        itemRepository.updateBookingItem(booking.getOwnerId(), booking.getId(), item);
+        itemRepository.updateBookingItem(item);
     }
 }

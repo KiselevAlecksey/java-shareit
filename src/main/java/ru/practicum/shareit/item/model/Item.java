@@ -2,10 +2,7 @@ package ru.practicum.shareit.item.model;
 
 import lombok.Builder;
 import lombok.Data;
-
-/**
- * TODO Sprint add-controllers.
- */
+import ru.practicum.shareit.user.model.User;
 
 @Data
 @Builder(toBuilder = true)
@@ -13,7 +10,7 @@ public class Item {
 
     Long id;
 
-    Long ownerId;
+    User owner;
 
     String name;
 

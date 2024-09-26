@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterConflictException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
-import ru.practicum.shareit.user.dto.NewUserDtoRequest;
-import ru.practicum.shareit.user.dto.UpdateUserDtoRequest;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.dto.UserDtoResponse;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDtoResponse create(NewUserDtoRequest userRequest) {
+    public UserDtoResponse create(UserCreateDto userRequest) {
 
         if (userRequest.getEmail() == null) {
             throw new ParameterNotValidException("email", "Поле email является обязательным");
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.mapToUser(userRequest);
 
-        checkEmailConflict(user);
+        checkEmailConflict(user.getEmail());
 
         User userCreated = userRepository.create(user);
 
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDtoResponse update(UpdateUserDtoRequest userRequest) {
+    public UserDtoResponse update(UserUpdateDto userRequest) {
 
         if (userRepository.getById(userRequest.getId()).isPresent()) {
 
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
             if (!(userUpdated.getEmail().equals(userRequest.getEmail()))) {
-                checkEmailConflict(userMapper.mapToUser(userRequest));
+                checkEmailConflict(userMapper.mapToUser(userRequest).getEmail());
             }
 
             userMapper.updateUserFields(userUpdated, userRequest);
@@ -73,15 +73,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean remove(long id) {
+
+        if (userRepository.getById(id).isEmpty()) {
+            return false;
+        }
+
         return userRepository.remove(id);
     }
 
-    private void checkEmailConflict(User user) {
-        List<User> users = userRepository.findAll().stream()
-                .filter(user1 -> user1.getEmail().equals(user.getEmail()))
-                .toList();
+    private void checkEmailConflict(String email) {
+        List<String> emails = userRepository.getEmails();
 
-        if (!users.isEmpty()) {
+        if (emails.contains(email)) {
             throw new ParameterConflictException("email", "Тайкой email уже занят");
         }
     }

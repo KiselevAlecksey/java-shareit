@@ -1,7 +1,6 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -15,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateUserDtoRequest {
+public class ItemUpdateDto {
 
     @Null
     Long id;
@@ -23,15 +22,23 @@ public class UpdateUserDtoRequest {
     @Size(min = 1)
     String name;
 
-    @Email
-    String email;
+    @Size(min = 1)
+    String description;
+
+    Boolean available;
+
+    Long userId;
 
     public boolean hasName() {
         return isNotBlank(name);
     }
 
-    public boolean hasEmail() {
-        return isNotBlank(email);
+    public boolean hasDescription() {
+        return isNotBlank(description);
+    }
+
+    public boolean hasAvailable() {
+        return available != null;
     }
 
     boolean isNotBlank(String value) {

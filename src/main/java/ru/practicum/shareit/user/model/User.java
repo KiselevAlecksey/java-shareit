@@ -3,10 +3,6 @@ package ru.practicum.shareit.user.model;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-/**
- * TODO Sprint add-controllers.
- */
-
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor

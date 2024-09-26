@@ -3,14 +3,12 @@ package ru.practicum.shareit.booking.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.util.Marker;
 
 import java.time.Instant;
 
@@ -24,13 +22,10 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
 
-    @NotNull(groups = Marker.OnCreate.class)
     Long ownerId;
 
-    @NotNull(groups = Marker.OnCreate.class)
     Long itemId;
 
-    @NotNull(groups = Marker.OnCreate.class)
     Instant startBooking;
 
     @Positive
@@ -38,7 +33,6 @@ public class BookingDto {
     @Min(1)
     Long duration;
 
-    @NotNull(groups = Marker.OnCreate.class)
     Long consumerId;
 
     String content;

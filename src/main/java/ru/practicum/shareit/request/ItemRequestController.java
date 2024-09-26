@@ -4,11 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
-import ru.practicum.shareit.util.Marker;
 
 import java.util.Collection;
 
@@ -26,11 +24,11 @@ public class ItemRequestController {
 
     @GetMapping
     public Collection<ItemRequestDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        log.info("ItemRequests get all start");
         return itemRequestService.getAll(userId);
     }
 
     @PostMapping
-    @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestDtoResponse add(
             @RequestHeader("X-Sharer-User-Id") long userId,
@@ -41,7 +39,6 @@ public class ItemRequestController {
     }
 
     @PatchMapping("/{itemId}")
-    @Validated({Marker.OnUpdate.class})
     public ItemRequestDtoResponse update(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long itemId,

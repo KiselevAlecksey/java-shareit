@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,9 +9,9 @@ public interface ItemRepository {
 
     List<Item> getAll(long userId);
 
-    Item save(long userId, Item item);
+    Item save(Item item);
 
-    Item update(long userId, long itemId, Item item);
+    Item update(Item item);
 
     void delete(long userId, long itemId);
 
@@ -20,9 +19,9 @@ public interface ItemRepository {
 
     List<Item> search(String text);
 
-    Item saveBookingItem(long ownerId, long id, Item item);
+    Item saveBookingItem(Item item);
 
-    boolean deleteBookingItem(long ownerId, long id, Item item);
+    boolean deleteBookingItem(Item item);
 
-    Item updateBookingItem(long ownerId, long id, Item item);
+    Item updateBookingItem(Item item);
 }

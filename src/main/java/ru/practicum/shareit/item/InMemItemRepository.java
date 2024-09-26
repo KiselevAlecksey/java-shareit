@@ -1,34 +1,35 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
 @Repository
-@RequiredArgsConstructor
 public class InMemItemRepository implements ItemRepository {
     private long countId = 0;
 
-    private final Map<Long, Map<Long, Item>> itemBookingMap = new HashMap<>();;
+    private final Map<Long, Map<Long, Item>> itemBookingMap = new HashMap<>();
 
-    private final Map<Long, Map<Long, Item>> itemMap = new HashMap<>();;
+    private final Map<Long, Map<Long, Item>> itemsMap = new HashMap<>();
+
+    private final Map<Long, List<Item>> userItemsMap = new HashMap<>();
 
     @Override
     public List<Item> getAll(long userId) {
-        return itemMap.get(userId).values().stream()
-                .peek(item -> {
-                    if (item == null) throw new NotFoundException("Предмет не найден");
-                })
-                .toList();
+        return userItemsMap.getOrDefault(userId, Collections.emptyList());
     }
 
     @Override
-    public Item saveBookingItem(long ownerId, long id, Item item) {
+    public Item saveBookingItem(Item item) {
 
-        Map<Long, Item> map = itemMap.get(ownerId);
+        long ownerId = item.getOwner().getId();
+
+        long id = item.getId();
+
+        Map<Long, Item> map = itemsMap.get(ownerId);
 
         map.put(id, item);
 
@@ -36,34 +37,43 @@ public class InMemItemRepository implements ItemRepository {
 
         delete(ownerId, id);
 
-        return getBookingItem(ownerId, id).orElseThrow(() -> new NotFoundException("Преедмет не найден"));
+        return getBookingItem(ownerId, id)
+                .orElseThrow(() -> new NotFoundException("Преедмет не найден"));
     }
 
     @Override
-    public boolean deleteBookingItem(long ownerId, long id, Item item) {
+    public boolean deleteBookingItem(Item item) {
+
+        long ownerId = item.getOwner().getId();
+
+        long id = item.getId();
 
         Map<Long, Item> mapBooking = itemBookingMap.get(ownerId);
 
-        Map<Long, Item> mapItems = itemMap.get(ownerId);
+        Map<Long, Item> mapItems = itemsMap.get(ownerId);
 
         mapBooking.putAll(mapItems);
 
-        itemMap.remove(ownerId);
+        itemsMap.remove(ownerId);
 
-        itemMap.put(ownerId, mapBooking);
+        itemsMap.put(ownerId, mapBooking);
 
         mapBooking.remove(id);
 
         itemBookingMap.put(ownerId, mapBooking);
 
-        return itemMap.get(ownerId).get(id) != null && getBookingItem(ownerId, id).isEmpty();
+        return itemsMap.get(ownerId).get(id) != null && getBookingItem(ownerId, id).isEmpty();
 
     }
 
     @Override
-    public Item updateBookingItem(long ownerId, long id, Item item) {
+    public Item updateBookingItem(Item item) {
 
-        if (itemMap.get(ownerId) == null || itemMap.get(ownerId).get(id) == null) {
+        long ownerId = item.getOwner().getId();
+
+        long id = item.getId();
+
+        if (itemsMap.get(ownerId) == null || itemsMap.get(ownerId).get(id) == null) {
             throw new NotFoundException("Не удалось обновить предмет");
         }
 
@@ -73,13 +83,14 @@ public class InMemItemRepository implements ItemRepository {
 
         itemBookingMap.put(ownerId, mapBooking);
 
-        return getBookingItem(ownerId, id).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+        return getBookingItem(ownerId, id)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
-    public Item save(long userId, Item item) {
+    public Item save(Item item) {
 
-        boolean isExist = itemMap.values().stream()
+        boolean isExist = itemsMap.values().stream()
                 .flatMap(map -> map.values().stream())
                 .anyMatch(value -> value.equals(item));
 
@@ -87,48 +98,68 @@ public class InMemItemRepository implements ItemRepository {
             throw new NotFoundException("Не удалось сохранить предмет");
         }
 
+        User user = item.getOwner();
+
         Item saveItem = item.toBuilder()
                         .id(++countId)
-                                .ownerId(userId)
+                                .owner(user)
                                         .build();
 
-        Map<Long, Item> map = itemMap.computeIfAbsent(userId, v -> new HashMap<>());
+        Map<Long, Item> map = itemsMap.computeIfAbsent(user.getId(), v -> new HashMap<>());
 
         map.put(countId, saveItem);
 
-        itemMap.put(userId, map);
+        itemsMap.put(user.getId(), map);
 
-        return get(userId, saveItem.getId()).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+        userItemsMap.computeIfAbsent(user.getId(), k -> new ArrayList<>()).add(saveItem);
+
+        return get(user.getId(), saveItem.getId())
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
-    public Item update(long userId, long itemId, Item item) {
+    public Item update(Item item) {
 
-        if (itemMap.get(userId) == null || itemMap.get(userId).get(itemId) == null) {
+        long ownerId = item.getOwner().getId();
+
+        long itemId = item.getId();
+
+        if (itemsMap.get(ownerId) == null || itemsMap.get(ownerId).get(itemId) == null) {
             throw new NotFoundException("Не удалось обновить предмет");
         }
 
-        Map<Long, Item> map = itemMap.get(userId);
+        Map<Long, Item> map = itemsMap.get(ownerId);
 
-        map.put(itemId, item);
+        map.put(ownerId, item);
 
-        itemMap.put(userId, map);
+        itemsMap.put(ownerId, map);
 
-        return get(userId, itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+        List<Item> itemList = userItemsMap.get(ownerId);
+
+        itemList.removeIf(item1 -> item1.getId().equals(itemId));
+
+        itemList.add(item);
+
+        return get(ownerId, item.getId())
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
     }
 
     @Override
     public void delete(long userId, long itemId) {
-        itemMap.get(userId).remove(itemId);
+        itemsMap.get(userId).remove(itemId);
 
-        if (itemMap.get(userId).isEmpty()) {
-            itemMap.remove(userId);
+        List<Item> itemList = userItemsMap.get(userId);
+
+        itemList.removeIf(item1 -> item1.getId().equals(itemId));
+
+        if (itemsMap.get(userId).isEmpty()) {
+            itemsMap.remove(userId);
         }
     }
 
     @Override
     public Optional<Item> get(long userId, long itemId) {
-        Map<Long, Item> map = itemMap.get(userId);
+        Map<Long, Item> map = itemsMap.get(userId);
 
         if (map == null) {
             throw new NotFoundException("Пользователь не найден");
@@ -144,8 +175,7 @@ public class InMemItemRepository implements ItemRepository {
 
         if (text.isEmpty()) return Collections.emptyList();
 
-        // алгоритм поиска плохой
-        List<Item> items = itemMap.values().stream()
+        List<Item> items = itemsMap.values().stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
                 .toList();

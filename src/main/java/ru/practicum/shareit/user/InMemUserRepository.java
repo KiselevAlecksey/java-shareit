@@ -15,6 +15,8 @@ public class InMemUserRepository implements UserRepository {
 
     final Map<Long, User> userMap = new HashMap<>();
 
+    final Map<Long, String> emailMap = new HashMap<>();
+
     public List<User> findAll() {
         return userMap.values().stream().toList();
     }
@@ -27,17 +29,23 @@ public class InMemUserRepository implements UserRepository {
         countId++;
         user.setId(countId);
         userMap.put(countId, user);
+        emailMap.put(countId, user.getEmail());
         return getById(user.getId()).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     public User update(User user) {
 
         userMap.put(user.getId(), user);
-
+        emailMap.put(user.getId(), user.getEmail());
         return getById(user.getId()).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     public boolean remove(long id) {
-        return userMap.remove(id) != null;
+        userMap.remove(id);
+        return true;
+    }
+
+    public List<String> getEmails() {
+        return emailMap.values().stream().toList();
     }
 }
