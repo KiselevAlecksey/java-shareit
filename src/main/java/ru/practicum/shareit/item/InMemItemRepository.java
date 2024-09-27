@@ -60,7 +60,7 @@ public class InMemItemRepository implements ItemRepository {
 
         itemsByUserMap.put(ownerId, mapBooking);
 
-        mapBooking.remove(id);
+        mapBooking.remove(itemDeleted);
 
         itemBookingMap.put(ownerId, mapBooking);
 
