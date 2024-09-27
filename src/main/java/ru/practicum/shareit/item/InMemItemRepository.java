@@ -11,15 +11,15 @@ import java.util.*;
 public class InMemItemRepository implements ItemRepository {
     private long countId = 0;
 
-    private final Map<Long, Map<Long, Item>> itemBookingMap = new HashMap<>();
+    private final Map<Long, Set<Item>> itemBookingMap = new HashMap<>();
 
-    private final Map<Long, Map<Long, Item>> itemsMap = new HashMap<>();
+    private final Map<Long, Set<Item>> itemsByUserMap = new HashMap<>();
 
-    private final Map<Long, List<Item>> userItemsMap = new HashMap<>();
+    private final Map<Long, Item> items = new HashMap<>();
 
     @Override
     public List<Item> getAll(long userId) {
-        return userItemsMap.getOrDefault(userId, Collections.emptyList());
+        return itemsByUserMap.getOrDefault(userId, Collections.emptySet()).stream().toList();
     }
 
     @Override
@@ -29,11 +29,11 @@ public class InMemItemRepository implements ItemRepository {
 
         long id = item.getId();
 
-        Map<Long, Item> map = itemsMap.get(ownerId);
+        Set<Item> itemSet = itemsByUserMap.get(ownerId);
 
-        map.put(id, item);
+        itemSet.add(item);
 
-        itemBookingMap.put(ownerId, map);
+        itemBookingMap.put(ownerId, itemSet);
 
         delete(ownerId, id);
 
@@ -48,21 +48,23 @@ public class InMemItemRepository implements ItemRepository {
 
         long id = item.getId();
 
-        Map<Long, Item> mapBooking = itemBookingMap.get(ownerId);
+        Item itemDeleted = items.get(id);
 
-        Map<Long, Item> mapItems = itemsMap.get(ownerId);
+        Set<Item> mapBooking = itemBookingMap.get(ownerId);
 
-        mapBooking.putAll(mapItems);
+        Set<Item> mapItems = itemsByUserMap.get(ownerId);
 
-        itemsMap.remove(ownerId);
+        mapBooking.addAll(mapItems);
 
-        itemsMap.put(ownerId, mapBooking);
+        itemsByUserMap.remove(ownerId);
+
+        itemsByUserMap.put(ownerId, mapBooking);
 
         mapBooking.remove(id);
 
         itemBookingMap.put(ownerId, mapBooking);
 
-        return itemsMap.get(ownerId).get(id) != null && getBookingItem(ownerId, id).isEmpty();
+        return !itemsByUserMap.get(ownerId).contains(itemDeleted) && getBookingItem(ownerId, id).isEmpty();
 
     }
 
@@ -73,13 +75,13 @@ public class InMemItemRepository implements ItemRepository {
 
         long id = item.getId();
 
-        if (itemsMap.get(ownerId) == null || itemsMap.get(ownerId).get(id) == null) {
+        if (itemsByUserMap.get(ownerId) == null || !itemsByUserMap.get(ownerId).contains(item)) {
             throw new NotFoundException("Не удалось обновить предмет");
         }
 
-        Map<Long, Item> mapBooking = itemBookingMap.get(ownerId);
+        Set<Item> mapBooking = itemBookingMap.get(ownerId);
 
-        mapBooking.put(id, item);
+        mapBooking.add(item);
 
         itemBookingMap.put(ownerId, mapBooking);
 
@@ -90,14 +92,6 @@ public class InMemItemRepository implements ItemRepository {
     @Override
     public Item save(Item item) {
 
-        boolean isExist = itemsMap.values().stream()
-                .flatMap(map -> map.values().stream())
-                .anyMatch(value -> value.equals(item));
-
-        if (isExist) {
-            throw new NotFoundException("Не удалось сохранить предмет");
-        }
-
         User user = item.getOwner();
 
         Item saveItem = item.toBuilder()
@@ -105,13 +99,13 @@ public class InMemItemRepository implements ItemRepository {
                                 .owner(user)
                                         .build();
 
-        Map<Long, Item> map = itemsMap.computeIfAbsent(user.getId(), v -> new HashMap<>());
+        Set<Item> itemSet = itemsByUserMap.computeIfAbsent(user.getId(), v -> new HashSet<>());
 
-        map.put(countId, saveItem);
+        itemSet.add(saveItem);
 
-        itemsMap.put(user.getId(), map);
+        itemsByUserMap.put(user.getId(), itemSet);
 
-        userItemsMap.computeIfAbsent(user.getId(), k -> new ArrayList<>()).add(saveItem);
+        items.put(saveItem.getId(), saveItem);
 
         return get(user.getId(), saveItem.getId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
@@ -124,21 +118,19 @@ public class InMemItemRepository implements ItemRepository {
 
         long itemId = item.getId();
 
-        if (itemsMap.get(ownerId) == null || itemsMap.get(ownerId).get(itemId) == null) {
+        Set<Item> itemSet = itemsByUserMap.get(ownerId);
+
+        Item item1 = items.get(itemId);
+
+        if (itemsByUserMap.get(ownerId) == null || !itemSet.contains(item1)) {
             throw new NotFoundException("Не удалось обновить предмет");
         }
 
-        Map<Long, Item> map = itemsMap.get(ownerId);
+        itemSet.add(item);
 
-        map.put(ownerId, item);
+        itemsByUserMap.put(ownerId, itemSet);
 
-        itemsMap.put(ownerId, map);
-
-        List<Item> itemList = userItemsMap.get(ownerId);
-
-        itemList.removeIf(item1 -> item1.getId().equals(itemId));
-
-        itemList.add(item);
+        items.put(itemId, item);
 
         return get(ownerId, item.getId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
@@ -146,26 +138,24 @@ public class InMemItemRepository implements ItemRepository {
 
     @Override
     public void delete(long userId, long itemId) {
-        itemsMap.get(userId).remove(itemId);
+        itemsByUserMap.get(userId).remove(items.get(itemId));
 
-        List<Item> itemList = userItemsMap.get(userId);
+        items.remove(itemId);
 
-        itemList.removeIf(item1 -> item1.getId().equals(itemId));
-
-        if (itemsMap.get(userId).isEmpty()) {
-            itemsMap.remove(userId);
+        if (itemsByUserMap.get(userId).isEmpty()) {
+            itemsByUserMap.remove(userId);
         }
     }
 
     @Override
     public Optional<Item> get(long userId, long itemId) {
-        Map<Long, Item> map = itemsMap.get(userId);
+        Set<Item> itemSet = itemsByUserMap.get(userId);
 
-        if (map == null) {
-            throw new NotFoundException("Пользователь не найден");
+        if (itemSet == null) {
+            throw new NotFoundException("Предмет не найден");
         }
 
-        Item item = map.get(itemId);
+        Item item = items.get(itemId);
 
         return Optional.ofNullable(item);
     }
@@ -175,9 +165,8 @@ public class InMemItemRepository implements ItemRepository {
 
         if (text.isEmpty()) return Collections.emptyList();
 
-        List<Item> items = itemsMap.values().stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
+        List<Item> items = itemsByUserMap.values().stream()
+                .flatMap(Set::stream)
                 .toList();
 
         return getSearchedItems(items, text);
@@ -217,13 +206,13 @@ public class InMemItemRepository implements ItemRepository {
     }
 
     private Optional<Item> getBookingItem(long userId, long itemId) {
-        Map<Long, Item> map = itemBookingMap.get(userId);
+        Set<Item> itemSet = itemBookingMap.get(userId);
 
-        if (map == null) {
+        if (itemSet == null) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        Item item = map.get(itemId);
+        Item item = items.get(itemId);
 
         return Optional.ofNullable(item);
     }
