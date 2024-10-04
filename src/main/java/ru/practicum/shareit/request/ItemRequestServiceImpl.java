@@ -35,7 +35,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDtoResponse add(Long userId, ItemRequestDto itemDto) {
 
-        if (userId == null || userRepository.getById(userId).isEmpty()) {
+        if (userId == null || userRepository.findById(userId).isEmpty()) {
             throw new NotFoundException("Пользователь не найден");
         }
 

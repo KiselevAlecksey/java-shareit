@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterConflictException;
-import ru.practicum.shareit.exception.ParameterNotValidException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -22,41 +21,37 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public List<UserDtoResponse> findAll() {
+    public List<UserResponseDto> findAll() {
         return userRepository.findAll().stream().map(userMapper::mapToUserDto).toList();
     }
 
     @Override
-    public UserDtoResponse getById(long id) {
-        User user = userRepository.getById(id)
+    public UserResponseDto getById(long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         return userMapper.mapToUserDto(user);
     }
 
     @Override
-    public UserDtoResponse create(UserCreateDto userRequest) {
-
-        if (userRequest.getEmail() == null) {
-            throw new ParameterNotValidException("email", "Поле email является обязательным");
-        }
+    public UserResponseDto create(UserCreateDto userRequest) {
 
         User user = userMapper.mapToUser(userRequest);
 
         checkEmailConflict(user.getEmail());
 
-        User userCreated = userRepository.create(user);
+        User userCreated = userRepository.save(user);
 
         return userMapper.mapToUserDto(userCreated);
     }
 
     @Override
-    public UserDtoResponse update(UserUpdateDto userRequest) {
+    public UserResponseDto update(UserUpdateDto userRequest) {
 
-        if (userRepository.getById(userRequest.getId()).isPresent()) {
+        User userUpdated = userRepository.findById(userRequest.getId())
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-            User userUpdated = userRepository.getById(userRequest.getId())
-                    .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        if (userUpdated != null) {
 
             if (!(userUpdated.getEmail().equals(userRequest.getEmail()))) {
                 checkEmailConflict(userMapper.mapToUser(userRequest).getEmail());
@@ -64,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
             userMapper.updateUserFields(userUpdated, userRequest);
 
-            User user = userRepository.update(userUpdated);
+            User user = userRepository.save(userUpdated);
 
             return userMapper.mapToUserDto(user);
         }
@@ -72,17 +67,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean remove(long id) {
+    public void remove(long id) {
 
-        if (userRepository.getById(id).isEmpty()) {
-            return false;
+        if (userRepository.findById(id).isEmpty()) {
+            return;
         }
 
-        return userRepository.remove(id);
+        userRepository.deleteById(id);
     }
 
     private void checkEmailConflict(String email) {
-        List<String> emails = userRepository.getEmails();
+        List<String> emails = userRepository.findAllEmails();
 
         if (emails.contains(email)) {
             throw new ParameterConflictException("email", "Тайкой email уже занят");
