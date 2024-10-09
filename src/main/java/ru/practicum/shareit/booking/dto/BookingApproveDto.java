@@ -1,25 +1,24 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.booking.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.user.model.User;
 
 @Getter
 @Setter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserCreateDto {
+public class BookingApproveDto {
 
-    @NotBlank
-    String name;
+    Long id;
 
-    @Email
-    @NotBlank
-    String email;
+    User owner;
+
+    Boolean approved;
+
 }

@@ -1,27 +1,28 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ItemRepository {
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    List<Item> getAll(long userId);
+    @Override
+    @EntityGraph("item.owner")
+    Optional<Item> findById(Long id);
 
-    Item save(Item item);
+    List<Item> findByNameContainingIgnoreCase(String text);
 
-    Item update(Item item);
+    @EntityGraph("item.owner")
+    @Query("SELECT i FROM Item i WHERE i.owner.id = :userId")
+    List<Item> findByUserId(@Param("userId") Long userId);
 
-    void delete(long userId, long itemId);
+    @EntityGraph("item.owner")
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.owner.id = :userId")
+    Integer findCountBookingsByUserId(@Param("userId") Long userId);
 
-    Optional<Item> get(long userId, long itemId);
-
-    List<Item> search(String text);
-
-    Item saveBookingItem(Item item);
-
-    boolean deleteBookingItem(Item item);
-
-    Item updateBookingItem(Item item);
 }

@@ -1,61 +1,82 @@
 package ru.practicum.shareit.booking.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingResponse;
-import ru.practicum.shareit.booking.dto.UpdateBookingConfirmResponse;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingUpdateDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
-import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class BookingMapper {
+    final UserMapper userMapper;
+    final ItemMapper itemMapper;
+    final CommentMapper commentMapper;
 
-    public Booking mapToBooking(BookingDto booking) {
+    public Booking mapToBooking(BookingCreateDto booking) {
 
         return Booking.builder()
-                .ownerId(booking.getOwnerId())
-                .itemId(booking.getItemId())
+                .item(booking.getItem())
                 .available(true)
-                .startBooking(booking.getStartBooking())
-                .duration(Duration.ofMillis(booking.getDuration()))
-                .consumerId(booking.getConsumerId())
+                .startBooking(booking.getStart())
+                .endBooking(booking.getEnd())
                 .build();
     }
 
-    public BookingResponse mapToBookingResponse(Booking booking) {
-        return new BookingResponse(
+    public BookingResponseDto mapToBookingResponse(Booking booking) {
+        String start = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                .withZone(ZoneOffset.UTC)
+                .format(booking.getStartBooking());
+
+        String end = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                .withZone(ZoneOffset.UTC)
+                .format(booking.getEndBooking());
+
+        String availableTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                .withZone(ZoneOffset.UTC)
+                .format(booking.getConfirmTime());
+
+        return new BookingResponseDto(
                 booking.getId(),
-                booking.getOwnerId(),
-                booking.getItemId(),
-                booking.getAvailable(),
-                booking.getStartBooking(),
-                booking.getDuration().toMillis(),
-                booking.getConsumerId(),
-                booking.getIsConfirm(),
-                booking.getConfirmTime()
+                itemMapper.mapToItemDto(booking.getItem()),
+                start,
+                end,
+                userMapper.mapToUserDto(booking.getConsumer()),
+                booking.getStatus().name(),
+                availableTime
         );
     }
 
-    public Booking updateBookingFields(Booking booking, BookingDto request) {
-        if (request.hasDuration()) {
-            booking.setDuration(Duration.ofMillis(request.getDuration()));
+    public Booking updateBookingFields(Booking booking, BookingUpdateDto request) {
+        if (request.hasStart()) {
+            booking.setStartBooking(request.getStart());
         }
+
+        if (request.hasEnd()) {
+            booking.setEndBooking(request.getEnd());
+        }
+
         if (request.hasContent()) {
             booking.setContent(request.getContent());
         }
-
         return booking;
     }
 
-    public Booking updateBookingConfirm(Booking booking, UpdateBookingConfirmResponse request) {
-        if (request.hasIsConfirm()) {
-            booking.setIsConfirm(request.getIsConfirm());
-        }
+    private String instantToString(Instant instant) {
 
-        return booking;
+        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        return zonedDateTime.format(formatter);
     }
 }
