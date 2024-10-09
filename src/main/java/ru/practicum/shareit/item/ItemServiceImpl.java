@@ -3,7 +3,6 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
@@ -18,10 +17,8 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -171,23 +168,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(comment.getItemId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        /*ZoneId zoneId = ZoneId.systemDefault();
-
-        ZonedDateTime zonedUser = ZonedDateTime.now(zoneId);
-
-        int offsetHours = zonedUser.getOffset().getTotalSeconds() / 3600;*/
-
-        //log.info("==> offsetHours: " + offsetHours);
-        Instant now = Instant.now();//.plusMillis(Duration.ofHours(offsetHours).toMillis());
-        log.info("==> current_time with tz: " + now);
-        String formattedInstant = DateTimeFormatter.ofPattern("MMM d, yyyy, hh:mm:ss a")
-                .withZone(ZoneId.of("UTC"))
-                .format(now);
-        log.info("==> formattedInstant: " + formattedInstant);
-
-        LocalDateTime dateTime = LocalDateTime.now();
-        log.info("==> dateTime: " + dateTime);
-        bookingRepository.findByItemIdAndConsumerIdAndEndBookingBefore(comment.getItemId(), comment.getUserId(), dateTime)
+        bookingRepository.findByItemIdAndConsumerIdAndEndBookingBefore(comment.getItemId(),
+                        comment.getUserId(), LocalDateTime.now())
                 .orElseThrow(() -> new ParameterNotValidException("Пользователь не пользовался предметом",
                         comment.getUserId().toString()));
 
