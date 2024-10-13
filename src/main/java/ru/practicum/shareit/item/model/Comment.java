@@ -15,9 +15,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NamedEntityGraph(name = "comment.item", attributeNodes = {
-        @NamedAttributeNode("item")
-})
 public class Comment {
 
     @Id

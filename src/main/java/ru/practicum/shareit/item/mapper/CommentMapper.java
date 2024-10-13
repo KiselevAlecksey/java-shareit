@@ -19,7 +19,6 @@ public final class CommentMapper {
 
         return Comment.builder()
                 .author(User.builder().id(request.getUserId()).build())
-                //.item(Item.builder().id(request.getItemId()).build())
                 .content(request.getText())
                 .createdDate(Instant.now())
                 .build();

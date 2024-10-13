@@ -15,9 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NamedEntityGraph(name = "item.owner", attributeNodes = {
-        @NamedAttributeNode("owner")
-})
 public class Item {
 
     @Id
