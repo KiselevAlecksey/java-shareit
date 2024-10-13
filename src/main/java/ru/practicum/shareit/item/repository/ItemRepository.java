@@ -1,7 +1,8 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
@@ -13,16 +14,16 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Override
     @EntityGraph("item.owner")
-    Optional<Item> findById(Long id);
+    Optional<Item> findById(Long itemId);
+
+    @EntityGraph("item.owner")
+    Optional<Item> findByIdAndOwnerId(Long itemId, Long ownerId);
 
     List<Item> findByNameContainingIgnoreCase(String text);
 
     @EntityGraph("item.owner")
-    @Query("SELECT i FROM Item i WHERE i.owner.id = :userId")
-    List<Item> findByUserId(@Param("userId") Long userId);
+    List<Item> findAllByOwnerId(@Param("ownerId") Long ownerId);
 
     @EntityGraph("item.owner")
-    @Query("SELECT COUNT(i) FROM Item i WHERE i.owner.id = :userId")
-    Integer findCountBookingsByUserId(@Param("userId") Long userId);
-
+    Integer countItemsByOwnerId(@Param("ownerId") Long ownerId);
 }

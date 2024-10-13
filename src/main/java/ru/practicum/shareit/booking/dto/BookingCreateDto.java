@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import java.time.LocalDateTime;
 
@@ -29,12 +29,12 @@ public class BookingCreateDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
 
-    Long consumerId;
+    Long bookerId;
 
     @Size(min = 1)
     String content;
 
-    Item item;
+    ItemResponseDto item;
 
     @AssertTrue
     boolean isStartBeforeEnd() {

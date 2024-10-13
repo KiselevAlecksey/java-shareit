@@ -1,19 +1,27 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
 
-public record ItemResponseDto(
-        Long id,
+@Getter
+@Setter
+@ToString
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+public class ItemResponseDto {
+        long id;
 
-        String name,
+        String name;
 
-        String description,
+        String description;
 
-        Boolean available,
+        Boolean available;
 
-        String lastBooking,
+        String lastBooking;
 
-        String nextBooking,
+        String nextBooking;
 
-        List<CommentResponseDto> comments) {
+        List<CommentResponseDto> comments;
 }

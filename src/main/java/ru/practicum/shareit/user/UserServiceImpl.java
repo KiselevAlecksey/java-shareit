@@ -77,9 +77,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkEmailConflict(String email) {
-        List<String> emails = userRepository.findAllEmails();
+        List<UserEmail> userEmails = userRepository.findAllByEmailContainingIgnoreCase(email);
 
-        if (emails.contains(email)) {
+        if (!userEmails.isEmpty() && userEmails.getFirst().getEmail().equals(email)) {
             throw new ParameterConflictException("email", "Тайкой email уже занят");
         }
     }

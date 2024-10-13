@@ -26,7 +26,7 @@ public class Item {
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     User owner;
 
     @Column(name = "name", nullable = false)
@@ -37,12 +37,6 @@ public class Item {
 
     @Column(name = "available", nullable = false)
     Boolean available;
-
-    @Transient
-    LocalDateTime lastBooking;
-
-    @Transient
-    LocalDateTime nextBooking;
 
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     List<Comment> comments;

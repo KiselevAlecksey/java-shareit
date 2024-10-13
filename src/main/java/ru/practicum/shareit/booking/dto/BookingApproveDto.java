@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.user.model.User;
 
 @Getter
 @Setter
@@ -17,7 +16,7 @@ public class BookingApproveDto {
 
     Long id;
 
-    User owner;
+    Long ownerId;
 
     Boolean approved;
 

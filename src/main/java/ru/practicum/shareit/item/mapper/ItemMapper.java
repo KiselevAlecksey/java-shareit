@@ -28,38 +28,14 @@ public final class ItemMapper {
 
     public ItemResponseDto mapToItemDto(Item item) {
 
-        List<CommentResponseDto> responseDtoList = Collections.emptyList();
-
-        if (item.getComments() != null && !item.getComments().isEmpty()) {
-            responseDtoList = item.getComments().stream()
-                    .map(commentMapper::mapToCommentDto)
-                    .toList();
-        }
-
-        String last = null;
-
-        if (item.getLastBooking() != null) {
-            last = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                    .withZone(ZoneOffset.UTC)
-                    .format(item.getLastBooking());
-        }
-
-        String next = null;
-
-        if (item.getNextBooking() != null) {
-            next = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                    .withZone(ZoneOffset.UTC)
-                    .format(item.getNextBooking());
-        }
-
         return new ItemResponseDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                last,
-                next,
-                responseDtoList
+                null,
+                null,
+                Collections.emptyList()
         );
     }
 

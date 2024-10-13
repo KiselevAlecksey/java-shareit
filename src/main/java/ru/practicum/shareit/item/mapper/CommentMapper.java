@@ -19,8 +19,8 @@ public final class CommentMapper {
     public Comment mapToComment(CommentCreateDto request) {
 
         return Comment.builder()
-                .consumer(User.builder().id(request.getUserId()).build())
-                .item(Item.builder().id(request.getItemId()).build())
+                .author(User.builder().id(request.getUserId()).build())
+                //.item(Item.builder().id(request.getItemId()).build())
                 .content(request.getText())
                 .createdDate(Instant.now())
                 .build();
@@ -38,7 +38,7 @@ public final class CommentMapper {
 
         return new CommentResponseDto(
                 comment.getId(),
-                comment.getConsumer().getName(),
+                comment.getAuthor().getName(),
                 comment.getContent(),
                 created
         );

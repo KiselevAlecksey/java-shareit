@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -24,7 +24,7 @@ import static ru.practicum.shareit.util.Const.ONE_DAY_IN_MILLIS;
 @NamedEntityGraph(name = "booking.full", attributeNodes = {
         @NamedAttributeNode("owner"),
         @NamedAttributeNode("item"),
-        @NamedAttributeNode("consumer")
+        @NamedAttributeNode("booker")
 })
 public class Booking {
 
@@ -53,8 +53,8 @@ public class Booking {
             .plusMillis(ONE_DAY_IN_MILLIS), ZoneId.systemDefault());
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consumer_id", nullable = false)
-    User consumer;
+    @JoinColumn(name = "booker_id", nullable = false)
+    User booker;
 
     @Column(name = "confirm_time", nullable = false)
     @Builder.Default
@@ -66,5 +66,5 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Builder.Default
-    Status status = Status.WAITING;
+    BookingStatus status = BookingStatus.WAITING;
 }

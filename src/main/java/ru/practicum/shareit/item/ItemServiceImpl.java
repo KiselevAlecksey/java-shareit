@@ -3,7 +3,9 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingAvailable;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -13,10 +15,13 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -36,10 +41,13 @@ public class ItemServiceImpl implements ItemService {
     final CommentMapper commentMapper;
 
     @Override
-    public List<ItemResponseDto> getAll(long userId) {
-        List<Item> items = itemRepository.findByUserId(userId);
-        List<Long> ids = items.stream().map(Item::getId).toList();
-        List<Booking> bookingList = bookingRepository.findByConsumerId(userId);
+    public List<ItemResponseDto> getAll(long ownerId) {
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
+
+        List<Booking> bookingList = bookingRepository
+                .findByItemIdAndEndBookingBeforeAndStartBookingAfterAndStatus(
+                        itemIds, LocalDateTime.now());
 
         if (bookingList.isEmpty()) {
             return items.stream()
@@ -47,46 +55,69 @@ public class ItemServiceImpl implements ItemService {
                     .toList();
         }
 
-        Map<Long, List<LocalDateTime>> bookingMap = new HashMap<>();
+        Map<Long, List<Booking>> bookingMap = new HashMap<>(items.size());
 
-        for (Long id : ids) {
-            List<Booking> list = new ArrayList<>();
-            for (Booking booking : bookingList) {
-                if (booking.getItem().getId().equals(id)) {
-                    list.add(booking);
-                }
+        for (Booking booking : bookingList) {
+            long itemId = booking.getItem().getId();
+
+            if (!bookingMap.containsKey(itemId)) {
+                bookingMap.put(itemId, new ArrayList<>());
             }
 
-            List<Booking> sortedLastBookings = list.stream()
-                    .filter(booking -> booking.getEndBooking()
-                            .isBefore(LocalDateTime.now()))
-                    .sorted(Comparator.comparing(Booking::getEndBooking).reversed())
-                    .toList();
-
-            List<Booking> sortedNextBookings = list.stream()
-                    .filter(booking -> booking.getStartBooking()
-                            .isAfter(LocalDateTime.now()))
-                    .sorted(Comparator.comparing(Booking::getStartBooking))
-                    .toList();
-
-            List<LocalDateTime> nextAndLastBookingList = new ArrayList<>();
-
-            nextAndLastBookingList.add(sortedNextBookings.getFirst().getStartBooking());
-            nextAndLastBookingList.add(sortedLastBookings.getFirst().getEndBooking());
-
-            bookingMap.put(id, nextAndLastBookingList);
-
+            List<Booking> itemBookings = bookingMap.get(itemId);
+            itemBookings.add(booking);
         }
 
-        for (Item item : items) {
-            List<LocalDateTime> nextAndLastList = bookingMap.get(item.getId());
-            item.setNextBooking(nextAndLastList.getFirst());
-            item.setLastBooking(nextAndLastList.getLast());
-        }
-
-        return items.stream()
+        List<ItemResponseDto> itemsDto = items.stream()
                 .map(itemMapper::mapToItemDto)
                 .toList();
+
+        setAdjacentBooking(itemsDto, bookingMap);
+
+        return itemsDto;
+    }
+
+    private void setAdjacentBooking(List<ItemResponseDto> itemsDto, Map<Long, List<Booking>> bookingMap) {
+        for (ItemResponseDto itemResponseDto : itemsDto) {
+
+            List<Booking> nextAndLastList = bookingMap.get(itemResponseDto.getId());
+
+            if (nextAndLastList == null) {
+                continue;
+            }
+
+            LocalDateTime firstEnd = nextAndLastList.getFirst().getEndBooking();
+            LocalDateTime firstStart = nextAndLastList.getFirst().getStartBooking();
+            LocalDateTime lastEnd = nextAndLastList.getLast().getEndBooking();
+
+            if (nextAndLastList.size() == 1) {
+
+                if (firstEnd.isBefore(LocalDateTime.now())) {
+                    itemResponseDto.setLastBooking(convertDateFormat(firstEnd));
+                } else {
+                    itemResponseDto.setNextBooking(convertDateFormat(firstStart));
+                }
+            } else {
+                if (firstEnd.isAfter(lastEnd)) {
+                    itemResponseDto.setNextBooking(convertDateFormat(firstStart));
+                    itemResponseDto.setLastBooking(convertDateFormat(lastEnd));
+                } else {
+                    itemResponseDto.setNextBooking(convertDateFormat(nextAndLastList.getLast().getStartBooking()));
+                    itemResponseDto.setLastBooking(convertDateFormat(firstEnd));
+                }
+            }
+        }
+    }
+
+    private String convertDateFormat(LocalDateTime localDateTime) {
+        String dateTimeformatted = null;
+
+        if (localDateTime != null) {
+            dateTimeformatted = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                    .withZone(ZoneOffset.UTC)
+                    .format(localDateTime);
+        }
+        return dateTimeformatted;
     }
 
     @Override
@@ -108,14 +139,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemResponseDto update(ItemUpdateDto itemDto) {
 
-        Item item = itemRepository.findById(itemDto.getId())
+        Item item = itemRepository.findByIdAndOwnerId(itemDto.getId(), itemDto.getOwnerId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
-
-        User user = item.getOwner();
-
-        if (user == null || !(user.getId() != null && user.getId().equals(itemDto.getUserId()))) {
-            throw new NotFoundException("Id заголовка и владельца не совпадают");
-        }
 
         itemMapper.updateItemFields(item, itemDto);
 
@@ -126,27 +151,31 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(long itemId) {
-
-        if (itemRepository.findById(itemId).isEmpty()) {
-            throw new NotFoundException("Предмет не найден");
-        }
-
         itemRepository.deleteById(itemId);
     }
 
     @Override
     public ItemResponseDto get(long userId, long itemId) {
 
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        item.setComments(commentRepository.findAllByItemId(itemId));
+        Optional<BookingAvailable> optionalBookingAvailable = bookingRepository
+                .findByItemIdAndEndBookingAfter(itemId, LocalDateTime.now());
 
-        return itemMapper.mapToItemDto(item);
+        if (optionalBookingAvailable.isPresent()) {
+            item.setAvailable(false);
+        }
+
+        ItemResponseDto itemResponseDto = itemMapper.mapToItemDto(item);
+
+        List<CommentResponseDto> commentResponseDtos = commentRepository.findAllByItemId(itemId).stream()
+                        .map(commentMapper::mapToCommentDto)
+                                .toList();
+
+        itemResponseDto.setComments(commentResponseDtos);
+
+        return itemResponseDto;
     }
 
     @Override
@@ -168,8 +197,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(comment.getItemId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        bookingRepository.findByItemIdAndConsumerIdAndEndBookingBefore(comment.getItemId(),
-                        comment.getUserId(), LocalDateTime.now())
+        bookingRepository.findByItemIdAndBookerIdAndEndBookingBefore(comment.getItemId(),
+                        comment.getUserId(), LocalDateTime.now(), Sort.by(Sort.Direction.DESC, "endBooking"))
                 .orElseThrow(() -> new ParameterNotValidException("Пользователь не пользовался предметом",
                         comment.getUserId().toString()));
 
@@ -177,7 +206,7 @@ public class ItemServiceImpl implements ItemService {
 
         newComment.setItem(item);
 
-        newComment.setConsumer(user);
+        newComment.setAuthor(user);
 
         Comment savedComment = commentRepository.save(newComment);
 

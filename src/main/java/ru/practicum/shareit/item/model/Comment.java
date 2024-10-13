@@ -15,8 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NamedEntityGraph(name = "comment.full", attributeNodes = {
-        @NamedAttributeNode("consumer"),
+@NamedEntityGraph(name = "comment.item", attributeNodes = {
         @NamedAttributeNode("item")
 })
 public class Comment {
@@ -33,8 +32,8 @@ public class Comment {
     Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consumer_id", nullable = false)
-    User consumer;
+    @JoinColumn(name = "author_id", nullable = false)
+    User author;
 
     @Column(name = "created_date", nullable = false)
     Instant createdDate;

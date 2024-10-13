@@ -26,7 +26,6 @@ public class BookingMapper {
     public Booking mapToBooking(BookingCreateDto booking) {
 
         return Booking.builder()
-                .item(booking.getItem())
                 .available(true)
                 .startBooking(booking.getStart())
                 .endBooking(booking.getEnd())
@@ -51,7 +50,7 @@ public class BookingMapper {
                 itemMapper.mapToItemDto(booking.getItem()),
                 start,
                 end,
-                userMapper.mapToUserDto(booking.getConsumer()),
+                userMapper.mapToUserDto(booking.getBooker()),
                 booking.getStatus().name(),
                 availableTime
         );

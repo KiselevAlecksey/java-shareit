@@ -11,15 +11,15 @@ public interface BookingService {
 
     BookingResponseDto create(BookingCreateDto bookingRequest);
 
-    BookingResponseDto getById(long userId, long bookingId);
+    BookingResponseDto getById(long bookerId, long bookingId);
 
     BookingResponseDto update(BookingUpdateDto bookingRequest);
 
     BookingResponseDto approve(BookingApproveDto bookingRequest);
 
-    void delete(long id);
+    void delete(long bookingId);
 
-    List<BookingResponseDto> getAllBookingsByConsumerId(long id, String state);
+    List<BookingResponseDto> getAllBookingsByBookerId(long bookerId, BookingStatus status);
 
-    List<BookingResponseDto> getAllBookingsByOwnerId(long id, String state);
+    List<BookingResponseDto> getAllBookingsByOwnerId(long ownerId, BookingStatus status);
 }

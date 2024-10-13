@@ -42,12 +42,12 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemResponseDto update(
-            @RequestHeader(USER_ID_HEADER) long userId,
+            @RequestHeader(USER_ID_HEADER) long ownerId,
             @PathVariable long itemId,
             @RequestBody @Valid ItemUpdateDto item) {
         log.info("==> Item update {} start", item);
         item.setId(itemId);
-        item.setUserId(userId);
+        item.setOwnerId(ownerId);
         ItemResponseDto dtoResponse = itemService.update(item);
         log.info("<== Item updated {} complete", item);
         return dtoResponse;
