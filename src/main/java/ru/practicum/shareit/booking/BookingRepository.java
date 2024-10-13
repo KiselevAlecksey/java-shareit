@@ -12,10 +12,6 @@ import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    @Override
-    @EntityGraph(attributePaths = {"item", "booker"})
-    Booking save(Booking booking);
-
     @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
 
@@ -34,6 +30,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllCurrentByBookerIdAndStatus(long bookerId, BookingStatus status, Sort sort);
 
+    @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllByOwnerId(long ownerId, Sort sort);
 
     @Query("SELECT b FROM Booking b WHERE b.owner.id = :ownerId AND b.status = 'APPROVED' " +
