@@ -22,7 +22,6 @@ import static ru.practicum.shareit.util.Const.ONE_DAY_IN_MILLIS;
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NamedEntityGraph(name = "booking.full", attributeNodes = {
-        @NamedAttributeNode("owner"),
         @NamedAttributeNode("item"),
         @NamedAttributeNode("booker")
 })

@@ -12,6 +12,11 @@ import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"item", "booker"})
+    Booking save(Booking booking);
+
+    @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
 
     @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = 'APPROVED' " +
@@ -26,6 +31,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.startBooking > CURRENT_TIMESTAMP")
     List<Booking> findFutureByBookerId(long bookerId, Sort sort);
 
+    @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllCurrentByBookerIdAndStatus(long bookerId, BookingStatus status, Sort sort);
 
     List<Booking> findAllByOwnerId(long ownerId, Sort sort);
@@ -42,6 +48,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.startBooking > CURRENT_TIMESTAMP")
     List<Booking> findFutureByOwnerId(long ownerId, Sort sort);
 
+    @EntityGraph(attributePaths = {"item", "booker"})
     List<Booking> findAllCurrentByOwnerIdAndStatus(long ownerId, BookingStatus status, Sort sort);
 
     @Query(value = "SELECT sub1.*\n" +
@@ -63,7 +70,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItemIdAndEndBookingBeforeAndStartBookingAfterAndStatus(
             List<Long> itemIds, LocalDateTime localDateTime);
 
-    @EntityGraph(value = "booking.full", type = EntityGraph.EntityGraphType.FETCH)
     Optional<BookingId> findByItemIdAndBookerIdAndEndBookingBefore(
             Long itemId, Long bookerId, LocalDateTime localDateTime, Sort sort);
 
