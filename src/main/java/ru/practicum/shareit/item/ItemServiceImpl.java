@@ -44,10 +44,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemResponseDto> getAll(long ownerId) {
         List<Item> items = itemRepository.findAllByOwnerId(ownerId);
         List<Long> itemIds = items.stream().map(Item::getId).toList();
-
         List<Booking> bookingList = bookingRepository
-                .findByItemIdAndEndBookingBeforeAndStartBookingAfterAndStatus(
-                        itemIds, LocalDateTime.now());
+                .findByItemIdAndEndBookingBeforeAndStartBookingAfterAndStatus(itemIds, LocalDateTime.now());
 
         if (bookingList.isEmpty()) {
             return items.stream()

@@ -5,11 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
