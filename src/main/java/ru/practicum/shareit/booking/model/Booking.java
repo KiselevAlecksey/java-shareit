@@ -31,7 +31,7 @@ public class Booking {
     @JoinColumn(name = "owner_id", nullable = false)
     User owner;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", nullable = false)
     Item item;
 
@@ -47,7 +47,7 @@ public class Booking {
     LocalDateTime endBooking = LocalDateTime.ofInstant(Instant.EPOCH
             .plusMillis(ONE_DAY_IN_MILLIS), ZoneId.systemDefault());
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "booker_id", nullable = false)
     User booker;
 

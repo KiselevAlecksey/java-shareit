@@ -23,7 +23,6 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -49,6 +48,7 @@ public class ItemServiceImpl implements ItemService {
         List<Long> itemIds = items.stream().map(Item::getId).toList();
         List<Booking> bookingList = bookingRepository
                 .findByItemIdAndEndBookingBeforeAndStartBookingAfterAndStatus(itemIds, LocalDateTime.now());
+        List<ItemResponseDto> itemResponseDtos = new ArrayList<>(items.size());
 
         if (bookingList.isEmpty()) {
             return items.stream()
@@ -69,56 +69,22 @@ public class ItemServiceImpl implements ItemService {
             itemBookings.add(booking);
         }
 
-        List<ItemResponseDto> itemsDto = items.stream()
-                .map(itemMapper::mapToItemDto)
-                .toList();
+        for (Item item : items) {
 
-        setAdjacentBooking(itemsDto, bookingMap);
+            List<Booking> nextAndLastListUnsorted = bookingMap.get(item.getId());
 
-        return itemsDto;
-    }
-
-    private void setAdjacentBooking(List<ItemResponseDto> itemsDto, Map<Long, List<Booking>> bookingMap) {
-        for (ItemResponseDto itemResponseDto : itemsDto) {
-
-            List<Booking> nextAndLastList = bookingMap.get(itemResponseDto.getId());
-
-            if (nextAndLastList == null) {
+            if (nextAndLastListUnsorted == null) {
                 continue;
             }
 
-            LocalDateTime firstEnd = nextAndLastList.getFirst().getEndBooking();
-            LocalDateTime firstStart = nextAndLastList.getFirst().getStartBooking();
-            LocalDateTime lastEnd = nextAndLastList.getLast().getEndBooking();
-
-            if (nextAndLastList.size() == 1) {
-
-                if (firstEnd.isBefore(LocalDateTime.now())) {
-                    itemResponseDto.setLastBooking(convertDateFormat(firstEnd));
-                } else {
-                    itemResponseDto.setNextBooking(convertDateFormat(firstStart));
-                }
-            } else {
-                if (firstEnd.isAfter(lastEnd)) {
-                    itemResponseDto.setNextBooking(convertDateFormat(firstStart));
-                    itemResponseDto.setLastBooking(convertDateFormat(lastEnd));
-                } else {
-                    itemResponseDto.setNextBooking(convertDateFormat(nextAndLastList.getLast().getStartBooking()));
-                    itemResponseDto.setLastBooking(convertDateFormat(firstEnd));
-                }
-            }
+            itemResponseDtos.add(itemMapper.mapToItemDto(
+                    item,
+                    getFirstAndLastBooking(nextAndLastListUnsorted).getLast(),
+                    getFirstAndLastBooking(nextAndLastListUnsorted).getFirst())
+            );
         }
-    }
 
-    private String convertDateFormat(LocalDateTime localDateTime) {
-        String dateTimeformatted = null;
-
-        if (localDateTime != null) {
-            dateTimeformatted = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-                    .withZone(ZoneOffset.UTC)
-                    .format(localDateTime);
-        }
-        return dateTimeformatted;
+        return itemResponseDtos;
     }
 
     @Override
@@ -159,7 +125,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto get(long userId, long itemId) {
+    public ItemResponseDto get(long itemId) {
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
@@ -215,5 +181,38 @@ public class ItemServiceImpl implements ItemService {
         Comment savedComment = commentRepository.save(newComment);
 
         return commentMapper.mapToCommentDto(savedComment);
+    }
+
+
+    private List<LocalDateTime> getFirstAndLastBooking(List<Booking> nextAndLastListUnsorted) {
+        int listSize = 2;
+        LocalDateTime lastBooking = null;
+        LocalDateTime nextBooking = null;
+        List<LocalDateTime> nextAndLastList = new ArrayList<>(listSize);
+
+        LocalDateTime firstEnd = nextAndLastListUnsorted.getFirst().getEndBooking();
+        LocalDateTime firstStart = nextAndLastListUnsorted.getFirst().getStartBooking();
+        LocalDateTime lastEnd = nextAndLastListUnsorted.getLast().getEndBooking();
+
+        if (nextAndLastListUnsorted.size() == 1) {
+
+            if (firstEnd.isBefore(LocalDateTime.now())) {
+                lastBooking = firstEnd;
+            } else {
+                nextBooking = firstStart;
+            }
+        } else {
+            if (firstEnd.isAfter(lastEnd)) {
+                nextBooking = firstStart;
+                lastBooking = lastEnd;
+            } else {
+                nextBooking = nextAndLastListUnsorted.getLast().getStartBooking();
+                lastBooking = firstEnd;
+            }
+        }
+
+        nextAndLastList.add(nextBooking);
+        nextAndLastList.add(lastBooking);
+        return nextAndLastList;
     }
 }

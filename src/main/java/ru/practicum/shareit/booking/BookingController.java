@@ -36,7 +36,7 @@ public class BookingController {
             @RequestHeader(USER_ID_HEADER) long bookerId,
             @PathVariable long bookingId) {
         log.info("==> Get booking by id {} start", bookingId);
-        BookingResponseDto booking = bookingService.getById(bookerId, bookingId);
+        BookingResponseDto booking = bookingService.getById(bookingId);
         log.info("<== Get booking by id {} complete", bookingId);
         return booking;
     }

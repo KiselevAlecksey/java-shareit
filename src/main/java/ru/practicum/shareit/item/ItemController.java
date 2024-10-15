@@ -63,11 +63,11 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemResponseDto get(
-            @RequestHeader(USER_ID_HEADER) long userId,
+            @RequestHeader(USER_ID_HEADER) long ownerId,
             @PathVariable long itemId) {
-        log.info("==> Item get userId {}, itemId {} start", userId, itemId);
-        ItemResponseDto dtoResponse = itemService.get(userId, itemId);
-        log.info("<== Item get userId {}, itemId {} complete", userId, itemId);
+        log.info("==> Item get userId {}, itemId {} start", ownerId, itemId);
+        ItemResponseDto dtoResponse = itemService.get(itemId);
+        log.info("<== Item get userId {}, itemId {} complete", ownerId, itemId);
         return dtoResponse;
     }
 

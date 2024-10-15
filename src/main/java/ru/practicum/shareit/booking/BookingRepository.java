@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
@@ -14,7 +13,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<BookingId> findByBookerId(long bookerId);
 
-    @EntityGraph(attributePaths = {"item"})
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
 
     @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = 'APPROVED' " +
@@ -29,10 +27,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.startBooking > CURRENT_TIMESTAMP")
     List<Booking> findFutureByBookerId(long bookerId, Sort sort);
 
-    @EntityGraph(attributePaths = {"item"})
     List<Booking> findAllCurrentByBookerIdAndStatus(long bookerId, BookingStatus status, Sort sort);
 
-    @EntityGraph(attributePaths = {"item"})
     List<Booking> findAllByOwnerId(long ownerId, Sort sort);
 
     @Query("SELECT b FROM Booking b WHERE b.owner.id = :ownerId AND b.status = 'APPROVED' " +
@@ -47,7 +43,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.startBooking > CURRENT_TIMESTAMP")
     List<Booking> findFutureByOwnerId(long ownerId, Sort sort);
 
-    @EntityGraph(attributePaths = {"item"})
     List<Booking> findAllCurrentByOwnerIdAndStatus(long ownerId, BookingStatus status, Sort sort);
 
     @Query(value = "SELECT next_booking.*\n" +

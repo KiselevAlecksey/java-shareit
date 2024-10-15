@@ -72,9 +72,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getById(long bookerId, long bookingId) {
-
-        getUserIfExist(bookerId);
+    public BookingResponseDto getById(long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь не найдена"));
