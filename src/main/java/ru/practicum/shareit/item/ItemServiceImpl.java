@@ -70,7 +70,6 @@ public class ItemServiceImpl implements ItemService {
         }
 
         for (Item item : items) {
-
             List<Booking> nextAndLastListUnsorted = bookingMap.get(item.getId());
 
             if (nextAndLastListUnsorted == null) {
@@ -80,8 +79,8 @@ public class ItemServiceImpl implements ItemService {
             itemResponseDtos.add(itemMapper.mapToItemDto(
                     item,
                     getFirstAndLastBooking(nextAndLastListUnsorted).getLast(),
-                    getFirstAndLastBooking(nextAndLastListUnsorted).getFirst())
-            );
+                    getFirstAndLastBooking(nextAndLastListUnsorted).getFirst()
+            ));
         }
 
         return itemResponseDtos;
@@ -182,7 +181,6 @@ public class ItemServiceImpl implements ItemService {
 
         return commentMapper.mapToCommentDto(savedComment);
     }
-
 
     private List<LocalDateTime> getFirstAndLastBooking(List<Booking> nextAndLastListUnsorted) {
         int listSize = 2;
