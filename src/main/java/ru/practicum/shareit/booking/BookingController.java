@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto create(
             @RequestHeader(USER_ID_HEADER) long bookerId,
-            @RequestBody @Valid BookingCreateDto bookingRequest) {
+            @RequestBody @Validated BookingCreateDto bookingRequest) {
         log.info("==> Created booking {} start", bookingRequest);
         bookingRequest.setBookerId(bookerId);
         BookingResponseDto created = bookingService.create(bookingRequest);
@@ -45,7 +44,7 @@ public class BookingController {
     @PatchMapping("/{bookerId}/{bookingId}")
     public BookingResponseDto update(
             @RequestHeader(USER_ID_HEADER) long bookerId,
-            @RequestBody @Valid BookingUpdateDto bookingRequest,
+            @RequestBody @Validated BookingUpdateDto bookingRequest,
             @PathVariable long bookingId) {
         log.info("==> updated booking {} start", bookingRequest);
         bookingRequest.setId(bookingId);
@@ -80,19 +79,31 @@ public class BookingController {
     @GetMapping
     public List<BookingResponseDto> getAllBookingsByBookerId(
             @RequestHeader(USER_ID_HEADER) long bookerId,
-            @RequestParam(defaultValue = "ALL") BookingStatus state) {
+            @RequestParam(defaultValue = "all") String state) {
         log.info("==> Get all bookings userId {}, state {} start", bookerId, state);
-        List<BookingResponseDto> bookings = bookingService.getAllBookingsByBookerId(bookerId, state);
-        log.info("==> Get all bookings userId {}, state {} complete", bookerId, state);
+
+        String status = state.toUpperCase();
+
+        BookingStatus bookingStatus = BookingStatus.from(status)
+                .orElseThrow(() -> new IllegalArgumentException("Не поддерживаемое состояние: " + status));
+
+        List<BookingResponseDto> bookings = bookingService.getAllBookingsByBookerId(bookerId, bookingStatus);
+        log.info("==> Get all bookings userId {}, state {} complete", bookerId, status);
         return bookings;
     }
 
     @GetMapping("/owner")
     public List<BookingResponseDto> getAllBookingsByOwnerId(
             @RequestHeader(USER_ID_HEADER) long ownerId,
-            @RequestParam(defaultValue = "ALL") BookingStatus status) {
-        log.info("==> Get all bookings ownerId {}, state {} start", ownerId, status);
-        List<BookingResponseDto> bookings = bookingService.getAllBookingsByOwnerId(ownerId, status);
+            @RequestParam(defaultValue = "all") String state) {
+        log.info("==> Get all bookings ownerId {}, state {} start", ownerId, state);
+
+        String status = state.toUpperCase();
+
+        BookingStatus bookingStatus = BookingStatus.from(status)
+                .orElseThrow(() -> new IllegalArgumentException("Не поддерживаемое состояние: " + status));
+
+        List<BookingResponseDto> bookings = bookingService.getAllBookingsByOwnerId(ownerId, bookingStatus);
         log.info("==> Get all bookings ownerId {}, state {} complete", ownerId, status);
         return bookings;
     }

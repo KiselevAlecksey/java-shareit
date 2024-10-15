@@ -5,8 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.List;
-
 @Entity
 @Table(name = "items")
 @Getter
@@ -33,7 +31,4 @@ public class Item {
 
     @Column(name = "available", nullable = false)
     Boolean available;
-
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
-    List<Comment> comments;
 }

@@ -36,7 +36,7 @@ public class BookingCreateDto {
 
     ItemResponseDto item;
 
-    @AssertTrue
+    @AssertTrue(message = "Start booking is invalid")
     boolean isStartBeforeEnd() {
         return start.isBefore(end);
     }

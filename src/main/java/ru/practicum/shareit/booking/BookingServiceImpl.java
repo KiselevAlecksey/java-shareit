@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -18,6 +21,8 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
+
+import java.util.Collections;
 import java.util.List;
 
 import static ru.practicum.shareit.booking.BookingStatus.*;
@@ -25,6 +30,7 @@ import static ru.practicum.shareit.util.Const.ONE_DAY_IN_MINUTES;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingServiceImpl implements BookingService {
 
@@ -39,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
     final BookingMapper bookingMapper;
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponseDto create(BookingCreateDto bookingRequest) {
 
         long itemId = bookingRequest.getItemId();
@@ -54,13 +61,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingMapper.mapToBooking(bookingRequest);
 
         booking.setAvailable(item.getAvailable());
-
         booking.setItem(item);
-
         booking.setBooker(user);
-
         booking.setOwner(item.getOwner());
-
         booking.setConfirmTime(booking.getStartBooking().plusMinutes(ONE_DAY_IN_MINUTES));
 
         Booking bookingCreated = bookingRepository.save(booking);
@@ -80,6 +83,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponseDto update(BookingUpdateDto bookingRequest) {
 
         Booking booking = bookingRepository.findById(bookingRequest.getId())
@@ -97,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BookingResponseDto approve(BookingApproveDto bookingRequest) {
 
         Booking booking = bookingRepository.findById(bookingRequest.getId())
@@ -125,19 +130,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public void delete(long bookingId) {
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new NotFoundException("Бронь не найдена")
+        BookingId id = bookingRepository.findByBookerId(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронь не найдена")
         );
 
-        if (!booking.getBooker().getId().equals(bookingId)) {
+        if (id.getId() != bookingId) {
             throw new NotFoundException("Удалить бронь может только создатель брони");
         }
-
-        itemRepository.findById(booking.getItem().getId()).orElseThrow(
-                () -> new NotFoundException("Предмет не найден")
-        );
 
         bookingRepository.deleteById(bookingId);
     }
@@ -145,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllBookingsByBookerId(long bookerId, BookingStatus status) {
 
-        getUserIfExist(bookerId);
+        User booker = getUserIfExist(bookerId);
 
         List<Booking> list;
 
@@ -162,20 +164,17 @@ public class BookingServiceImpl implements BookingService {
             default -> throw new ParameterNotValidException("Не поддерживаемое состояние:", status.name());
         };
 
+        if (list.isEmpty()) return Collections.emptyList();
+
         return list.stream()
+                .peek(booking -> booking.setBooker(booker))
                 .map(bookingMapper::mapToBookingResponse)
                 .toList();
     }
 
     @Override
     public List<BookingResponseDto> getAllBookingsByOwnerId(long ownerId, BookingStatus status) {
-        getUserIfExist(ownerId);
-
-        Integer count = itemRepository.countItemsByOwnerId(ownerId);
-
-        if (count < 1) {
-            throw new NotFoundException("У пользователя отсутствуют предметы");
-        }
+        User booker = getUserIfExist(ownerId);
 
         List<Booking> list;
 
@@ -191,12 +190,17 @@ public class BookingServiceImpl implements BookingService {
             default -> throw new ParameterNotValidException("Не поддерживаемое состояние:", status.name());
         };
 
+        if (list.isEmpty()) return Collections.emptyList();
+
         return list.stream()
+                .peek(booking -> booking.setBooker(booker))
                 .map(bookingMapper::mapToBookingResponse)
                 .toList();
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     private User getUserIfExist(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 }

@@ -3,9 +3,11 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingAvailable;
+import ru.practicum.shareit.booking.BookingId;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -26,6 +28,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
     final ItemRepository itemRepository;
@@ -119,6 +122,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ItemResponseDto create(ItemCreateDto itemDto) {
 
         Item item = itemMapper.mapToItem(itemDto);
@@ -135,6 +139,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ItemResponseDto update(ItemUpdateDto itemDto) {
 
         Item item = itemRepository.findByIdAndOwnerId(itemDto.getId(), itemDto.getOwnerId())
@@ -148,6 +153,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void delete(long itemId) {
         itemRepository.deleteById(itemId);
     }
@@ -188,6 +194,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public CommentResponseDto createComment(CommentCreateDto comment) {
         User user = userRepository.findById(comment.getUserId())
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
@@ -195,15 +202,14 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(comment.getItemId())
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        bookingRepository.findByItemIdAndBookerIdAndEndBookingBefore(comment.getItemId(),
-                        comment.getUserId(), LocalDateTime.now(), Sort.by(Sort.Direction.DESC, "endBooking"))
+        BookingId bookingIdOnly = bookingRepository.findByItemIdAndBookerIdAndEndBookingLessThanEqual(comment.getItemId(),
+                comment.getUserId(), LocalDateTime.now())
                 .orElseThrow(() -> new ParameterNotValidException("Пользователь не пользовался предметом",
                         comment.getUserId().toString()));
 
         Comment newComment = commentMapper.mapToComment(comment);
 
         newComment.setItem(item);
-
         newComment.setAuthor(user);
 
         Comment savedComment = commentRepository.save(newComment);

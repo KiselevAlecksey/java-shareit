@@ -2,6 +2,9 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterConflictException;
 import ru.practicum.shareit.user.dto.UserCreateDto;
@@ -13,6 +16,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -34,6 +38,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserResponseDto create(UserCreateDto userRequest) {
 
         User user = userMapper.mapToUser(userRequest);
@@ -46,6 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserResponseDto update(UserUpdateDto userRequest) {
 
         User userUpdated = userRepository.findById(userRequest.getId())
@@ -67,15 +73,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void remove(long id) {
-
-        if (userRepository.findById(id).isEmpty()) {
-            return;
-        }
-
         userRepository.deleteById(id);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     private void checkEmailConflict(String email) {
         List<UserEmail> userEmails = userRepository.findAllByEmailContainingIgnoreCase(email);
 

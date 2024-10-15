@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemResponseDto create(
             @RequestHeader(USER_ID_HEADER) long userId,
-            @RequestBody @Valid ItemCreateDto item) {
+            @RequestBody @Validated ItemCreateDto item) {
         log.info("==> Item create {} start", item);
         item.setUserId(userId);
         ItemResponseDto dto = itemService.create(item);
@@ -44,7 +43,7 @@ public class ItemController {
     public ItemResponseDto update(
             @RequestHeader(USER_ID_HEADER) long ownerId,
             @PathVariable long itemId,
-            @RequestBody @Valid ItemUpdateDto item) {
+            @RequestBody @Validated ItemUpdateDto item) {
         log.info("==> Item update {} start", item);
         item.setId(itemId);
         item.setOwnerId(ownerId);
@@ -85,7 +84,7 @@ public class ItemController {
     public CommentResponseDto createComment(
             @RequestHeader(USER_ID_HEADER) long userId,
             @PathVariable long itemId,
-            @RequestBody @Valid CommentCreateDto comment) {
+            @RequestBody @Validated CommentCreateDto comment) {
         log.info("==> Comment create {} start", comment);
         comment.setUserId(userId);
         comment.setItemId(itemId);
