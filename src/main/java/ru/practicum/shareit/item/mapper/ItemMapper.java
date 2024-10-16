@@ -1,17 +1,20 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.dto.ItemCreateDto;
-import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public final class ItemMapper {
+    final CommentMapper commentMapper;
 
     public Item mapToItem(ItemCreateDto request) {
 
@@ -23,12 +26,29 @@ public final class ItemMapper {
                 .build();
     }
 
-    public ItemDtoResponse mapToItemDto(Item item) {
-        return new ItemDtoResponse(
+    public ItemResponseDto mapToItemDto(Item item) {
+
+        return new ItemResponseDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable()
+                item.getAvailable(),
+                null,
+                null,
+                Collections.emptyList()
+        );
+    }
+
+    public ItemResponseDto mapToItemDto(Item item, LocalDateTime lastBooking, LocalDateTime nextBooking) {
+
+        return new ItemResponseDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                convertDateFormat(lastBooking),
+                convertDateFormat(nextBooking),
+                Collections.emptyList()
         );
     }
 
@@ -43,5 +63,16 @@ public final class ItemMapper {
             item.setAvailable(request.getAvailable());
         }
         return item;
+    }
+
+    private String convertDateFormat(LocalDateTime localDateTime) {
+        String dateTimeformatted = null;
+
+        if (localDateTime != null) {
+            dateTimeformatted = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                    .withZone(ZoneOffset.UTC)
+                    .format(localDateTime);
+        }
+        return dateTimeformatted;
     }
 }

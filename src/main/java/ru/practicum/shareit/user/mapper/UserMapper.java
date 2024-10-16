@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
+import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
 
 @Component
@@ -26,8 +26,8 @@ public final class UserMapper {
                 .build();
     }
 
-    public UserDtoResponse mapToUserDto(User user) {
-        return new UserDtoResponse(
+    public UserResponseDto mapToUserDto(User user) {
+        return new UserResponseDto(
                 user.getId(),
                 user.getName(),
                 user.getEmail()

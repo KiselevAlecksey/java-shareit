@@ -1,7 +1,10 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.booking.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 @Getter
@@ -9,14 +12,12 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemDto {
+public class BookingApproveDto {
 
     Long id;
 
-    String name;
+    Long ownerId;
 
-    String description;
-
-    Boolean available;
+    Boolean approved;
 
 }

@@ -27,7 +27,7 @@ public class ItemUpdateDto {
 
     Boolean available;
 
-    Long userId;
+    Long ownerId;
 
     public boolean hasName() {
         return isNotBlank(name);

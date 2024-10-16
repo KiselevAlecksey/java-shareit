@@ -1,16 +1,15 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.dto.ItemCreateDto;
-import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
+
+import static ru.practicum.shareit.util.Const.USER_ID_HEADER;
 
 @Slf4j
 @RestController
@@ -18,39 +17,37 @@ import java.util.List;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
-
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDtoResponse> getAll(@RequestHeader(USER_ID_HEADER) long userId) {
+    public List<ItemResponseDto> getAll(@RequestHeader(USER_ID_HEADER) long userId) {
         log.info("==> Users get all start");
-        List<ItemDtoResponse> items = itemService.getAll(userId);
+        List<ItemResponseDto> items = itemService.getAll(userId);
         log.info("<== Users get all start");
         return items;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDtoResponse create(
+    public ItemResponseDto create(
             @RequestHeader(USER_ID_HEADER) long userId,
-            @RequestBody @Valid ItemCreateDto item) {
+            @RequestBody @Validated ItemCreateDto item) {
         log.info("==> Item create {} start", item);
         item.setUserId(userId);
-        ItemDtoResponse dto = itemService.create(item);
+        ItemResponseDto dto = itemService.create(item);
         log.info("<== Item created {} complete", item);
         return dto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDtoResponse update(
-            @RequestHeader(USER_ID_HEADER) long userId,
+    public ItemResponseDto update(
+            @RequestHeader(USER_ID_HEADER) long ownerId,
             @PathVariable long itemId,
-            @RequestBody @Valid ItemUpdateDto item) {
+            @RequestBody @Validated ItemUpdateDto item) {
         log.info("==> Item update {} start", item);
         item.setId(itemId);
-        item.setUserId(userId);
-        ItemDtoResponse dtoResponse = itemService.update(item);
+        item.setOwnerId(ownerId);
+        ItemResponseDto dtoResponse = itemService.update(item);
         log.info("<== Item updated {} complete", item);
         return dtoResponse;
     }
@@ -60,25 +57,39 @@ public class ItemController {
             @RequestHeader(USER_ID_HEADER) long userId,
             @PathVariable long itemId) {
         log.info("==> Item delete userId {}, itemId {} start", userId, itemId);
-        itemService.delete(userId, itemId);
+        itemService.delete(itemId);
         log.info("<== Item deleted userId {}, itemId {} complete", userId, itemId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoResponse get(
-            @RequestHeader(USER_ID_HEADER) long userId,
+    public ItemResponseDto get(
+            @RequestHeader(USER_ID_HEADER) long ownerId,
             @PathVariable long itemId) {
-        log.info("==> Item get userId {}, itemId {} start", userId, itemId);
-        ItemDtoResponse dtoResponse = itemService.get(userId, itemId);
-        log.info("<== Item get userId {}, itemId {} complete", userId, itemId);
+        log.info("==> Item get userId {}, itemId {} start", ownerId, itemId);
+        ItemResponseDto dtoResponse = itemService.get(itemId);
+        log.info("<== Item get userId {}, itemId {} complete", ownerId, itemId);
         return dtoResponse;
     }
 
     @GetMapping("/search")
-    public List<ItemDtoResponse> search(@RequestParam(defaultValue = "") String text) {
+    public List<ItemResponseDto> search(@RequestParam(defaultValue = "") String text) {
         log.info("==> Item search text {} start", text);
-        List<ItemDtoResponse> itemDtoResponses = itemService.search(text);
+        List<ItemResponseDto> itemDtoResponses = itemService.search(text);
         log.info("<== Item search text {} complete", text);
         return itemDtoResponses;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponseDto createComment(
+            @RequestHeader(USER_ID_HEADER) long userId,
+            @PathVariable long itemId,
+            @RequestBody @Validated CommentCreateDto comment) {
+        log.info("==> Comment create {} start", comment);
+        comment.setUserId(userId);
+        comment.setItemId(itemId);
+        CommentResponseDto dto = itemService.createComment(comment);
+        log.info("<== Comment created {} complete", comment);
+        return dto;
     }
 }
