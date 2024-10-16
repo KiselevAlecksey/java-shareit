@@ -72,11 +72,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getById(long bookingId) {
+    public BookingResponseDto getById(long bookingId, long userId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь не найдена"));
 
+        if (!(booking.getBooker().getId() == (userId) || booking.getOwner().getId() == (userId))) {
+            throw new NotFoundException("Пользователь должен быть владельцем вещи или создателем брони");
+        }
         return bookingMapper.mapToBookingResponse(booking);
     }
 
