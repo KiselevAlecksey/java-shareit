@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.dto;
 
-public record UserDtoResponse(
+public record UserResponseDto(
 
-        Long id,
+        long id,
 
         String name,
 

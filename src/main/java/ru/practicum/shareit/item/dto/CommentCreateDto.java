@@ -1,7 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 @Getter
@@ -9,14 +13,12 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemDto {
+public class CommentCreateDto {
 
-    Long id;
+    @NotBlank
+    String text;
 
-    String name;
+    Long userId;
 
-    String description;
-
-    Boolean available;
-
+    Long itemId;
 }

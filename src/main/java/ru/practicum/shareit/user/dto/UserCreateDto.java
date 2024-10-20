@@ -20,5 +20,6 @@ public class UserCreateDto {
     String name;
 
     @Email
+    @NotBlank
     String email;
 }
