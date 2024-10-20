@@ -57,7 +57,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "FROM (\n" +
             "    SELECT *\n" +
             "    FROM BOOKINGS b2\n" +
-            "    WHERE b2.item_id IN (:itemIds) AND b2.end_booking < :localDateTime AND b2.status = 'APPROVED'\n" +
+            "    WHERE b2.item_id IN (:itemIds) AND\n" +
+            "    b2.end_booking < :localDateTime OR \n" +
+            "    (b2.start_booking < :localDateTime AND b2.end_booking >= :localDateTime) AND b2.status = 'APPROVED'\n" +
             "    ORDER BY b2.end_booking DESC LIMIT 1\n" +
             ") AS last_booking",
             nativeQuery = true)
