@@ -22,17 +22,17 @@ public class ItemRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description")
     String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requestor_id", nullable = false)
+    @JoinColumn(name = "requestor_id")
     User requestor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     Item item;
 
-    @Column(name = "created_date", nullable = false)
+    @Column(name = "created_date")
     LocalDateTime created;
 }

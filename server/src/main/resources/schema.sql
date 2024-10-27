@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS items (
   description TEXT,
   owner_id BIGINT,
   available BOOLEAN,
-  request_id BIGINT,
+  request_id BIGINT NULL,
   FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

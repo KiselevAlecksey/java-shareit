@@ -33,7 +33,7 @@ public class Item {
     @Column(name = "available", nullable = false)
     Boolean available;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "request_id")
     ItemRequest request;
 }
