@@ -1,7 +1,5 @@
 package ru.practicum.shareit.user;
 
-
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +20,6 @@ import static ru.practicum.shareit.util.TestDataFactory.*;
 @SpringBootTest
 @DisplayName("UserService")
 class UserServiceImplTest {
-    private final EntityManager entityManager;
 
     private final UserService userService;
 

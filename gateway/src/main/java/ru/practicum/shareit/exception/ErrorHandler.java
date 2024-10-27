@@ -17,23 +17,15 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
-        log.info("Получен статус 404 Not found");
+        log.info("Получен статус 404 Not found {}", e.getMessage(), e);
 
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handle(final Throwable e) {
-        log.trace("Получен статус 500 Internal server error ", e);
-
-        return new ErrorResponse("Произошла непредвиденная ошибка ", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleParameterNotValid(final MethodArgumentNotValidException e) {
-        log.info("Получен статус 400 Bad request");
+        log.info("Получен статус 400 Bad request {}", e.getMessage(), e);
 
         String message = null;
 
@@ -49,17 +41,9 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(final RuntimeException e) {
-        log.info("Получен статус 400 Bad request");
+    public ErrorResponse handleBadRequest(final ConstraintViolationException e) {
+        log.info("Получен статус 400 Bad request {}", e.getMessage(), e);
 
-        String message;
-
-        switch (e) {
-            case ConstraintViolationException constraintViolationException ->
-                    message = "Некорректное значение параметра: " + e.getMessage();
-            case null, default -> message = "Некорректный запрос";
-        }
-
-        return new ErrorResponse(message);
+        return new ErrorResponse("Некорректное значение параметра: " + e.getMessage());
     }
 }

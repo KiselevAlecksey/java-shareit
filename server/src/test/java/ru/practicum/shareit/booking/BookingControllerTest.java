@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 
 import static org.mockito.Mockito.*;
@@ -29,8 +32,13 @@ class BookingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeEach
+    void init() {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+    }
 
     @Test
     @DisplayName("Доблжен создать бронирование")

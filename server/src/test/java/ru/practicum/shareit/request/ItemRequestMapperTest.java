@@ -2,7 +2,10 @@ package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.ItemShort;
 import ru.practicum.shareit.item.dto.ItemShortResponseDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -16,7 +19,9 @@ import static ru.practicum.shareit.util.TestDataFactory.*;
 @DisplayName("ItemRequestMapper")
 class ItemRequestMapperTest {
 
-    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
+    private final ItemMapper itemMapper = new ItemMapper(new CommentMapper());
+
+    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper(itemMapper);
 
     @Test
     @DisplayName("Должен маппить дто в модель запроса")
@@ -44,7 +49,7 @@ class ItemRequestMapperTest {
         itemRequest.setCreated(NOW_DATE_TIME);
         String created = convertDatePattern(NOW_DATE_TIME);
 
-        List<ItemShortResponseDto> items = Collections
+        List<ItemShort> items = Collections
                 .singletonList(new ItemShortResponseDto(TEST_ID_ONE, "name", TEST_USER_ID));
 
         ItemRequestResponseDto itemRequestDto = itemRequestMapper.mapToItemRequestDto(itemRequest, items);

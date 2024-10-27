@@ -29,7 +29,6 @@ class ItemRequestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test

@@ -1,13 +1,10 @@
 package ru.practicum.shareit.request;
 
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemShort;
-import ru.practicum.shareit.item.dto.ItemShortResponseDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -18,7 +15,6 @@ import ru.practicum.shareit.user.UserRepository;
 import java.util.*;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
 
@@ -42,7 +38,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<Long> itemRequestIds = itemRequests.stream().map(ItemRequest::getId).toList();
         List<ItemShort> itemShortList = itemRepository.findByItemRequestIds(itemRequestIds);
 
-        Map<Long, List<ItemShortResponseDto>> itemShortMap = new HashMap<>(itemShortList.size());
+        Map<Long, List<ItemShort>> itemShortMap = new HashMap<>(itemShortList.size());
 
         List<ItemRequestResponseDto> responseDtoList = new ArrayList<>(itemRequestIds.size());
 
@@ -54,19 +50,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         for (ItemShort itemShort : itemShortList) {
             long itemId = itemShort.getId();
-
-            itemShortMap.computeIfAbsent(itemId, k -> new ArrayList<>());
-
-            itemShortMap.get(itemId).add(itemMapper.mapToItemShortDto(itemShort));
+            itemShortMap.computeIfAbsent(itemId, k -> new ArrayList<>()).add(itemShort);
         }
 
         for (ItemRequest itemRequest : itemRequests) {
-
             long itemId = itemRequest.getItem().getId();
-
             ItemRequestResponseDto responseDto = itemRequestMapper
-                    .mapToItemRequestDto(itemRequest, Collections.unmodifiableList(itemShortMap.get(itemId)));
-
+                    .mapToItemRequestDto(itemRequest, itemShortMap.get(itemId));
             responseDtoList.add(responseDto);
         }
 
@@ -76,14 +66,35 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestResponseDto> getAll() {
         List<ItemRequest> itemRequests = itemRequestRepository.findAll(SORT_BY_CREATE_DATE_DESC);
+        List<Long> itemRequestIds = itemRequests.stream().map(ItemRequest::getId).toList();
+        List<ItemShort> itemShortList = itemRepository.findByItemRequestIds(itemRequestIds);
 
-        return itemRequests.stream()
-                .map(itemRequestMapper::mapToItemRequestDto)
-                .toList();
+        Map<Long, List<ItemShort>> itemShortMap = new HashMap<>(itemShortList.size());
+
+        List<ItemRequestResponseDto> responseDtoList = new ArrayList<>(itemRequestIds.size());
+
+        if (itemShortList.isEmpty()) {
+            return itemRequests.stream()
+                    .map(itemRequestMapper::mapToItemRequestDto)
+                    .toList();
+        }
+
+        for (ItemShort itemShort : itemShortList) {
+            long itemId = itemShort.getId();
+            itemShortMap.computeIfAbsent(itemId, k -> new ArrayList<>()).add(itemShort);
+        }
+
+        for (ItemRequest itemRequest : itemRequests) {
+            long itemId = itemRequest.getItem().getId();
+            ItemRequestResponseDto responseDto = itemRequestMapper
+                    .mapToItemRequestDto(itemRequest, itemShortMap.get(itemId));
+            responseDtoList.add(responseDto);
+        }
+
+        return responseDtoList;
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ItemRequestResponseDto create(ItemRequestCreateDto createDto) {
 
         ItemRequest itemRequest = itemRequestMapper.mapToItemRequest(createDto);
@@ -103,11 +114,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemShort> itemShortList = itemRepository
                 .findByItemRequestIds(listIds);
 
-        List<ItemShortResponseDto> responseDtoList = itemShortList.stream()
-                .map(itemMapper::mapToItemShortDto)
-                .toList();
-
-        return itemRequestMapper.mapToItemRequestDto(itemRequest, responseDtoList);
+        return itemRequestMapper.mapToItemRequestDto(itemRequest, itemShortList);
     }
 
 }

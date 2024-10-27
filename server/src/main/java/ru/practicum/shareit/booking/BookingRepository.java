@@ -5,16 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingId;
-import ru.practicum.shareit.booking.model.BookingOwnerId;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-
-    @Query("SELECT b.booker.id AS bookerId FROM Booking b WHERE b.id = :bookingId")
-    Optional<BookingOwnerId> findOwnerIdByBookingId(long bookingId);
 
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
 

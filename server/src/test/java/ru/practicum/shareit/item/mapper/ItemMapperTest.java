@@ -30,7 +30,7 @@ public class ItemMapperTest {
         assertEquals("Item Name", item.getName());
         assertEquals("Item Description", item.getDescription());
         assertTrue(item.getAvailable());
-        assertNull(item.getRequestId());
+        assertNull(item.getRequest().getId());
     }
 
     @Test

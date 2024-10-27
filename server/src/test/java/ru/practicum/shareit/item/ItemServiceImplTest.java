@@ -33,7 +33,7 @@ class ItemServiceImplTest {
     @Test
     @DisplayName("Должен создавать новый элемент")
     void should_create_item() {
-        ItemResponseDto dto = itemService.create(itemCreateDto());
+        ItemResponseDto dto = itemService.create(itemCreateRequestOneDto());
 
         long testId = dto.getId();
 

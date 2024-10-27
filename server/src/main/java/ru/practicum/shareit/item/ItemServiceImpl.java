@@ -19,6 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -27,7 +29,6 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
     final ItemRepository itemRepository;
@@ -37,6 +38,8 @@ public class ItemServiceImpl implements ItemService {
     final CommentRepository commentRepository;
 
     final BookingRepository bookingRepository;
+
+    final ItemRequestRepository requestRepository;
 
     final ItemMapper itemMapper;
 
@@ -87,7 +90,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ItemResponseDto create(ItemCreateDto itemDto) {
 
         Item item = itemMapper.mapToItem(itemDto);
@@ -98,13 +100,18 @@ public class ItemServiceImpl implements ItemService {
         item.getOwner().setEmail(user.getEmail());
         item.getOwner().setName(user.getName());
 
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = requestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Запрос не найден"));
+            item.setRequest(request);
+        }
+
         Item itemCreated = itemRepository.save(item);
 
         return itemMapper.mapToItemDto(itemCreated);
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ItemResponseDto update(ItemUpdateDto itemDto) {
 
         Item item = itemRepository.findByIdAndOwnerId(itemDto.getId(), itemDto.getOwnerId())

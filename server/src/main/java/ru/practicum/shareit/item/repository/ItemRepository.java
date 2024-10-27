@@ -18,6 +18,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT i.id AS id, i.name AS name, i.owner.id AS ownerId " +
             "FROM Item i " +
-            "WHERE i.requestId IN (:itemRequestIds)")
+            "WHERE i.request.id IN (:itemRequestIds)")
     List<ItemShort> findByItemRequestIds(List<Long> itemRequestIds);
 }

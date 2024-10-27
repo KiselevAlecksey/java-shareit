@@ -16,7 +16,6 @@ import ru.practicum.shareit.user.model.User;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 

@@ -44,9 +44,8 @@ class ErrorHandlerTest {
     @Test
     @DisplayName("Должен обрабатывать ошибки 'Bad Request'")
     void should_handle_bad_request_error_conditions_not_met() {
-        RuntimeException exception = new ConditionsNotMetException("Параметр должен быть задан");
-
-        ErrorResponse response = errorHandler.handleBadRequest(exception);
+        ErrorResponse response = errorHandler
+                .handleConditionsNotMetException(new ConditionsNotMetException("Параметр должен быть задан"));
 
         assertEquals("Условия не соблюдены: Параметр должен быть задан", response.getError());
     }
@@ -56,9 +55,9 @@ class ErrorHandlerTest {
     void should_handle_bad_request_error_parameter_not_valid() {
         String parameter = "age";
         String reason = "Age must be a positive number";
-        RuntimeException exception = new ParameterNotValidException(parameter, reason);
 
-        ErrorResponse response = errorHandler.handleBadRequest(exception);
+        ErrorResponse response = errorHandler
+                .handleParameterNotValid(new ParameterNotValidException(parameter, reason));
 
         assertEquals("Некорректное значение параметра age: Age must be a positive number", response.getError());
     }
@@ -66,10 +65,10 @@ class ErrorHandlerTest {
     @Test
     @DisplayName("Должен обрабатывать общие ошибки 'Bad Request'")
     void should_handle_generic_bad_request_error() {
-        RuntimeException exception = new RuntimeException("Generic bad request");
+        Throwable exception = new Throwable("Произошла непредвиденная ошибка");
 
-        ErrorResponse response = errorHandler.handleBadRequest(exception);
+        ErrorResponse response = errorHandler.handle(exception);
 
-        assertEquals("Некорректный запрос", response.getError());
+        assertEquals("Произошла непредвиденная ошибка", response.getError());
     }
 }

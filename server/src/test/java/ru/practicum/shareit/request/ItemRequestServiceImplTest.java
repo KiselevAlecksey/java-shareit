@@ -35,7 +35,7 @@ class ItemRequestServiceImplTest {
 
         List<ItemRequestResponseDto> responseDtoList = itemRequestService.getAll();
 
-        assertEquals(createAllItemRequestDtoWithoutItemList(), responseDtoList, "Списки должны совпадать");
+        assertEquals(createAllItemRequestDtoList(), responseDtoList, "Списки должны совпадать");
     }
 
     @Test

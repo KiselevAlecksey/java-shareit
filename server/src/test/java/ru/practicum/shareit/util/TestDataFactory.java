@@ -143,9 +143,9 @@ public class TestDataFactory {
     public static List<ItemRequestResponseDto> createAllItemRequestDtoList() {
         List<ItemRequestResponseDto> list = new ArrayList<>(3);
         list.add(new ItemRequestResponseDto(
-                TEST_ID_ONE, "Хочу почитать эту книгу.", "2023-09-29T15:00:00", createItem3ShortDtoList()));
+                TEST_ID_ONE, "Хочу почитать эту книгу.", "2023-09-29T15:00:00", createItemShortDtoList()));
         list.add(new ItemRequestResponseDto(
-                TEST_ID_TWO, "Нужно взять ноутбук на неделю.", "2023-11-03T19:00:00", createItem3ShortDtoList()));
+                TEST_ID_TWO, "Нужно взять ноутбук на неделю.", "2023-11-03T19:00:00", Collections.emptyList()));
         list.add(new ItemRequestResponseDto(
                 TEST_ID_THREE, "Планирую покататься на выходных.", "2023-11-28T22:00:00", createItem3ShortDtoList()));
 
@@ -188,6 +188,10 @@ public class TestDataFactory {
 
     public static ItemCreateDto itemCreateDto() {
         return new ItemCreateDto("Книги", "Сборник рассказов", true, TEST_ID_FOUR, TEST_USER_ID);
+    }
+
+    public static ItemCreateDto itemCreateRequestOneDto() {
+        return new ItemCreateDto("Книги", "Сборник рассказов", true, TEST_ID_ONE, TEST_USER_ID);
     }
 
     public static ItemResponseDto itemCreatedDto() {
@@ -279,6 +283,15 @@ public class TestDataFactory {
 
         list.add(new ItemShortResponseDto(
                 TEST_ITEM3_ID, "Велосипед", TEST_USER3_ID));
+
+        return list;
+    }
+
+    public static List<ItemShortResponseDto> createItem2ShortDtoList() {
+        List<ItemShortResponseDto> list = new ArrayList<>();
+
+        list.add(new ItemShortResponseDto(
+                TEST_ITEM2_ID, "Ноутбук", TEST_USER2_ID));
 
         return list;
     }

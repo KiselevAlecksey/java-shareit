@@ -14,7 +14,6 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.dto.BookingUpdateDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingOwnerId;
 import ru.practicum.shareit.exception.ConditionsNotMetException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ParameterNotValidException;
@@ -31,7 +30,6 @@ import static ru.practicum.shareit.util.Const.ONE_DAY_IN_MINUTES;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingServiceImpl implements BookingService {
 
@@ -46,7 +44,6 @@ public class BookingServiceImpl implements BookingService {
     final BookingMapper bookingMapper;
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponseDto create(BookingCreateDto bookingRequest) {
 
         long itemId = bookingRequest.getItemId();
@@ -85,7 +82,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponseDto update(BookingUpdateDto bookingRequest) {
 
         Booking booking = bookingRepository.findById(bookingRequest.getId())
@@ -135,11 +131,11 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void delete(long bookingId, long bookerId) {
 
-        BookingOwnerId booker = bookingRepository.findOwnerIdByBookingId(bookingId)
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь не найдена")
         );
 
-        if (booker.getBookerId() != bookerId) {
+        if (booking.getBooker().getId() != bookerId) {
             throw new NotFoundException("Удалить бронь может только создатель брони");
         }
 

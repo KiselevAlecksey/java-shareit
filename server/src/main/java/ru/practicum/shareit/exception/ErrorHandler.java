@@ -14,7 +14,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
-        log.info("Получен статус 404 Not found");
+        log.info("Получен статус 404 Not found {}", e.getMessage(), e);
 
         return new ErrorResponse(e.getMessage());
     }
@@ -22,27 +22,32 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleParameterConflict(final ParameterConflictException e) {
-        log.info("Received status 409 Conflict");
+        log.info("Received status 409 Conflict {}", e.getMessage(), e);
 
-        return new ErrorResponse("Некорректное значение параметра "
-                + e.getParameter() + ": " + e.getReason());
+        return new ErrorResponse("Некорректное значение параметра " + e.getParameter() + ": " + e.getReason());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handle(final Throwable e) {
+        log.trace("Получен статус 500 Internal server error {}", e.getMessage(), e);
+
+        return new ErrorResponse("Произошла непредвиденная ошибка");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(final RuntimeException e) {
-        log.info("Получен статус 400 Bad request");
+    public ErrorResponse handleParameterNotValid(final ParameterNotValidException e) {
+        log.trace("Получен статус 400 Bad request {}", e.getMessage(), e);
 
-        String message;
+        return new ErrorResponse("Некорректное значение параметра " + e.getParameter() + ": " + e.getReason());
+    }
 
-        switch (e) {
-            case ConditionsNotMetException conditionsNotMetException ->
-                    message = "Условия не соблюдены: " + e.getMessage();
-            case ParameterNotValidException paramEx ->
-                    message = "Некорректное значение параметра " + paramEx.getParameter() + ": " + paramEx.getReason();
-            case null, default -> message = "Некорректный запрос";
-        }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConditionsNotMetException(final ConditionsNotMetException e) {
+        log.trace("Получен статус 400 Bad request {}", e.getMessage(), e);
 
-        return new ErrorResponse(message);
+        return new ErrorResponse("Условия не соблюдены: " + e.getMessage());
     }
 }

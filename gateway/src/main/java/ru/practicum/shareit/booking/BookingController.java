@@ -95,7 +95,7 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<Object> getAllBookingsByOwnerId(
             @RequestHeader(USER_ID_HEADER) long ownerId,
-            @RequestParam(defaultValue = "all") String state) {
+            @RequestParam(defaultValue = "ALL") String state) {
         log.info("==> Get all bookings ownerId {}, state {} start", ownerId, state);
 
         String status = state.toUpperCase();
