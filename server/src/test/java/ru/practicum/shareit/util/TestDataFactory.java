@@ -301,11 +301,11 @@ public class TestDataFactory {
     public static List<CommentResponseDto> createCommentDtoList() {
         List<CommentResponseDto> list = new ArrayList<>(3);
         list.add(new CommentResponseDto(
-                TEST_ID_ONE, "Иван Иванов", "Велосипедом доволен, спасибо!", "2023-12-08 12:00:00"));
+                TEST_ID_ONE, "Иван Иванов", "Велосипедом доволен, спасибо!", "2023-12-08T12:00:00"));
         list.add(new CommentResponseDto(
-                TEST_ID_TWO, "Петр Петров", "Отличная книга!", "2023-10-16 10:00:00"));
+                TEST_ID_TWO, "Петр Петров", "Отличная книга!", "2023-10-16T10:00:00"));
         list.add(new CommentResponseDto(
-                TEST_ID_THREE, "Анна Сидорова", "Очень удобный ноутбук.", "2023-11-21 11:00:00"));
+                TEST_ID_THREE, "Анна Сидорова", "Очень удобный ноутбук.", "2023-11-21T11:00:00"));
 
         return list;
     }
