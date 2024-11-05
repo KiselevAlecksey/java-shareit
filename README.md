@@ -62,4 +62,4 @@ ShareIt - это приложение, разработанное с испол�
 
 Тесты выполнены с использованием тестового профиля на H2, реализованы тесты для REST-эндпоинтов приложения с использованием `MockMVC`. А также интеграционные тесты.
 
-![gitTitle](https://raw.githubusercontent.com/KiselevAlecksey/java-filmorate/main/media/schema.png)
+![gitTitle](https://raw.githubusercontent.com/KiselevAlecksey/java-shareit/main/media/schema.png)
