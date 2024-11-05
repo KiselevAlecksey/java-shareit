@@ -12,7 +12,7 @@ public enum BookingStatus {
     FUTURE;
 
     static Optional<BookingStatus> from(String status) {
-        for (BookingStatus value : BookingStatus.values()) {
+        for (BookingStatus value : values()) {
             if (value.name().equals(status)) {
                 return Optional.of(value);
             }
